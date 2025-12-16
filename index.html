@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Chat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="login">
+    <div class="login-container">
+      <h1>🔐 Community Login</h1>
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="tua@email.com">
+      </div>
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••">
+      </div>
+      <button id="loginBtn">Accedi</button>
+    </div>
+  </div>
+  
+  <!-- Community Chat Screen -->
+  <div id="community" class="hidden">
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="user-profile">
+          <img id="userAvatar" src="" alt="Avatar" class="avatar">
+          <div class="user-info">
+            <div id="userName" class="user-name">Utente</div>
+            <div id="userEmail" class="user-email">email@email.com</div>
+          </div>
+        </div>
+        <button id="closeSidebar" class="close-btn">×</button>
+      </div>
+      
+      <div class="search-box">
+        <input type="text" id="searchChannels" placeholder="Cerca canali...">
+      </div>
+      
+      <div class="channels-list" id="channelsList">
+        <!-- I canali verranno caricati dinamicamente -->
+      </div>
+      
+      <button id="logoutBtn" class="logout-btn">Esci</button>
+    </div>
+    
+    <!-- Main Chat Area -->
+    <div class="main-chat">
+      <div class="chat-header">
+        <button id="toggleSidebar" class="menu-btn">☰</button>
+        <div class="channel-info">
+          <h2 id="channelName">Seleziona un canale</h2>
+          <span id="channelDesc" class="channel-desc">Crittografato end-to-end</span>
+        </div>
+      </div>
+      
+      <div id="warning" class="warning hidden"></div>
+      
+      <div id="messages" class="messages"></div>
+      
+      <div class="message-input">
+        <button class="attach-btn">📎</button>
+        <input type="text" id="msg" placeholder="Scrivi un messaggio...">
+        <button id="sendBtn">Invia</button>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module" src="app.js"></script>
+</body>
+</html>
