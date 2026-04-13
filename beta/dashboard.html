@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraVerse</title>
+    <link rel="icon" href="images/aura-nobg.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <style>
+        :root {
+            --accent:#F05BFF; --accent-soft:rgba(240,91,255,0.10); --accent-glow:rgba(240,91,255,0.22);
+            --border-accent:rgba(240,91,255,0.25); --gradient:linear-gradient(135deg,#F05BFF,#7000FF);
+            --gradient-text:linear-gradient(135deg,#F05BFF 0%,#a855f7 50%,#7000FF 100%);
+            --transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+            --bg:#f2f2f7; --surface:#ffffff; --surface-2:rgba(0,0,0,0.033);
+            --text:#1d1d1f; --text-muted:#6e6e73; --border:rgba(0,0,0,0.07);
+            --shadow:0 2px 16px rgba(0,0,0,0.06); --shadow-hover:0 8px 32px rgba(0,0,0,0.10);
+            --sidebar-bg:#ffffff;
+        }
+        @media (prefers-color-scheme:dark) {
+            :root {
+                --bg:#0b0b0e; --surface:rgba(18,18,22,0.95); --surface-2:rgba(255,255,255,0.04);
+                --text:#f5f5f7; --text-muted:#a1a1a6; --border:rgba(255,255,255,0.07);
+                --shadow:0 2px 20px rgba(0,0,0,0.35); --shadow-hover:0 8px 40px rgba(0,0,0,0.45);
+                --sidebar-bg:rgba(12,12,16,0.98);
+            }
+        }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;min-height:100vh;line-height:1.6}
+        body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
+        .app-layout{display:grid;grid-template-columns:260px 1fr 300px;min-height:100vh;max-width:1280px;margin:0 auto;position:relative;z-index:1}
+
+        /* SIDEBAR LEFT */
+        .sidebar-left{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:24px 16px;background:var(--sidebar-bg);border-right:1px solid var(--border);backdrop-filter:blur(24px);overflow-y:auto}
+        .logo-wrap{display:flex;align-items:center;gap:10px;padding:6px 12px 16px;text-decoration:none}
+        .logo-wrap img{width:32px;height:32px;border-radius:8px}
+        .logo-name{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--text)}
+        .logo-name span{background:var(--gradient-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .btn-compose{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:50px;background:var(--gradient);color:white;border:none;font-weight:700;font-size:.9rem;cursor:pointer;font-family:'Poppins',sans-serif;margin-bottom:18px;box-shadow:0 6px 24px var(--accent-glow);transition:var(--transition)}
+        .btn-compose:hover{transform:translateY(-2px);box-shadow:0 10px 32px var(--accent-glow)}
+        .nav-links{display:flex;flex-direction:column;gap:3px}
+        .nav-link{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;text-decoration:none;color:var(--text-muted);font-weight:500;font-size:.9rem;transition:var(--transition);border:1px solid transparent;cursor:pointer;background:none;font-family:'Poppins',sans-serif;width:100%;text-align:left}
+        .nav-link i{width:20px;text-align:center;font-size:16px}
+        .nav-link:hover{background:var(--surface-2);color:var(--text)}
+        .nav-link.active{background:var(--accent-soft);color:var(--accent);border-color:var(--border-accent)}
+        .sidebar-divider{border:none;border-top:1px solid var(--border);margin:14px 4px}
+        .sidebar-user{margin-top:auto;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:1px solid var(--border);background:var(--surface-2);cursor:pointer;transition:var(--transition);text-decoration:none}
+        .sidebar-user:hover{border-color:var(--border-accent);background:var(--accent-soft)}
+        .sidebar-user img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex-shrink:0}
+        .sidebar-user-info{flex:1;min-width:0}
+        .sidebar-user-name{font-weight:700;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .sidebar-user-handle{font-size:.72rem;color:var(--text-muted)}
+
+        /* MAIN FEED */
+        .main-feed{border-left:1px solid var(--border);border-right:1px solid var(--border);min-height:100vh}
+        .feed-header{position:sticky;top:0;z-index:100;background:var(--sidebar-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+        .feed-tabs{display:flex}
+        .feed-tab{flex:1;padding:16px;text-align:center;font-weight:600;font-size:.875rem;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:var(--transition);border:none;background:none;font-family:'Poppins',sans-serif}
+        .feed-tab.active{color:var(--text);border-bottom:2px solid var(--accent)}
+        .feed-tab:hover:not(.active){background:var(--surface-2)}
+
+        /* COMPOSE */
+        .compose-box{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;gap:14px;align-items:flex-start}
+        .compose-box img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex-shrink:0}
+        .compose-right{flex:1}
+        .compose-textarea{width:100%;background:none;border:none;color:var(--text);font-family:'Poppins',sans-serif;font-size:1rem;font-weight:400;resize:none;min-height:56px;outline:none;line-height:1.5}
+        .compose-textarea::placeholder{color:var(--text-muted)}
+        .compose-actions{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+        .compose-tools{display:flex;gap:4px}
+        .compose-tool{width:34px;height:34px;border-radius:50%;border:none;background:none;color:var(--accent);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+        .compose-tool:hover{background:var(--accent-soft)}
+        .char-count{font-size:.72rem;color:var(--text-muted);font-weight:500}
+        .char-count.warn{color:#ff9f0a}.char-count.danger{color:#ff6b6b}
+        .btn-post{padding:9px 20px;border-radius:50px;background:var(--gradient);color:white;border:none;font-weight:700;font-size:.82rem;cursor:pointer;font-family:'Poppins',sans-serif;box-shadow:0 4px 16px var(--accent-glow);transition:var(--transition)}
+        .btn-post:hover{transform:translateY(-1px)}
+        .btn-post:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+        /* POSTS */
+        .feed-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px;color:var(--text-muted)}
+        .spinner{width:28px;height:28px;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .post-card{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;gap:14px;cursor:pointer;transition:background .2s;animation:fadeIn .4s ease both}
+        .post-card:hover{background:var(--surface-2)}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        .post-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;transition:var(--transition)}
+        .post-card:hover .post-avatar{border-color:var(--border-accent)}
+        .post-body{flex:1;min-width:0}
+        .post-header{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:4px}
+        .post-author-name{font-weight:700;font-size:.9rem;text-decoration:none;color:var(--text)}
+        .post-author-name:hover{text-decoration:underline}
+        .verified-icon{color:var(--accent);font-size:13px}
+        .post-handle{color:var(--text-muted);font-size:.82rem}
+        .post-dot{color:var(--text-muted);font-size:.75rem}
+        .post-time{color:var(--text-muted);font-size:.82rem}
+        .post-menu-wrap{position:relative;margin-left:auto}
+        .post-menu-btn{width:28px;height:28px;border-radius:50%;background:none;border:none;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:var(--transition)}
+        .post-menu-btn:hover{background:var(--accent-soft);color:var(--accent)}
+        .post-content{font-size:.935rem;line-height:1.6;margin-bottom:12px;word-break:break-word}
+        .post-content .hashtag{color:var(--accent);font-weight:500;cursor:pointer}
+        .post-content .mention{color:var(--accent);font-weight:500;cursor:pointer}
+        .post-actions{display:flex;gap:0;margin-left:-8px}
+        .post-action{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:50px;border:none;background:none;color:var(--text-muted);font-size:.8rem;font-weight:500;font-family:'Poppins',sans-serif;cursor:pointer;transition:var(--transition)}
+        .post-action i{font-size:15px}
+        .post-action:hover{background:var(--accent-soft);color:var(--accent)}
+        .post-action.liked{color:#ff6b6b}
+        .post-action.liked i{animation:heartPop .35s cubic-bezier(0.34,1.56,0.64,1)}
+        @keyframes heartPop{0%{transform:scale(1)}50%{transform:scale(1.45)}100%{transform:scale(1)}}
+        .post-action.bookmarked{color:var(--accent)}
+
+        /* DROPDOWN */
+        .dropdown{position:absolute;top:calc(100% + 4px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-hover);min-width:180px;overflow:hidden;z-index:200;animation:dropIn .2s ease both}
+        @keyframes dropIn{from{opacity:0;transform:scale(.95) translateY(-4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .dd-item{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:.875rem;color:var(--text);cursor:pointer;transition:background .15s}
+        .dd-item:hover{background:var(--surface-2)}
+        .dd-item.danger{color:#ff6b6b}
+        .dd-item i{width:16px;text-align:center}
+
+        /* EMPTY */
+        .empty-state{text-align:center;padding:60px 32px}
+        .empty-icon{font-size:3rem;margin-bottom:16px;display:block;background:var(--gradient-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .empty-state h3{font-size:1.2rem;font-weight:800;margin-bottom:8px}
+        .empty-state p{font-size:.875rem;color:var(--text-muted);font-weight:300}
+
+        /* RIGHT SIDEBAR */
+        .sidebar-right{position:sticky;top:0;height:100vh;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:16px}
+        .search-wrap{position:relative}
+        .search-wrap .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;pointer-events:none}
+        .search-input{width:100%;padding:11px 14px 11px 38px;border-radius:50px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-family:'Poppins',sans-serif;font-size:.875rem;transition:var(--transition);outline:none}
+        .search-input:focus{border-color:var(--border-accent);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent-soft)}
+        .search-results{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:var(--shadow-hover);display:none}
+        .search-results.open{display:block}
+        .sri-section{padding:12px 16px 4px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted)}
+        .sri-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;transition:background .15s}
+        .sri-item:hover{background:var(--surface-2)}
+        .sri-item img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--border);flex-shrink:0}
+        .sri-name{font-weight:700;font-size:.85rem;display:flex;align-items:center;gap:4px}
+        .sri-sub{font-size:.75rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+        .widget-r{background:var(--surface);border-radius:20px;padding:20px;border:1px solid var(--border);box-shadow:var(--shadow)}
+        .widget-r-title{font-size:1rem;font-weight:800;margin-bottom:16px;letter-spacing:-.01em}
+        .trend-item{padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:var(--transition)}
+        .trend-item:last-child{border-bottom:none;padding-bottom:0}
+        .trend-item:hover{padding-left:6px}
+        .trend-cat{font-size:.68rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+        .trend-tag{font-size:.9rem;font-weight:700;background:var(--gradient-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:inline-block}
+        .trend-count{font-size:.72rem;color:var(--text-muted)}
+        .follow-item{display:flex;align-items:center;gap:10px;padding:8px 0}
+        .follow-item img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0}
+        .follow-info{flex:1;min-width:0}
+        .follow-name{font-weight:700;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px}
+        .follow-handle{font-size:.75rem;color:var(--text-muted)}
+        .btn-follow{padding:6px 16px;border-radius:50px;border:1.5px solid var(--border-accent);background:none;color:var(--accent);font-weight:700;font-size:.75rem;cursor:pointer;font-family:'Poppins',sans-serif;transition:var(--transition);flex-shrink:0}
+        .btn-follow:hover{background:var(--accent);color:white;border-color:var(--accent)}
+        .btn-follow.following{background:var(--accent-soft)}
+
+        /* POST MODAL */
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(10px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s ease}
+        .modal-overlay.open{opacity:1;pointer-events:all}
+        .post-modal{background:var(--surface);border:1px solid var(--border);border-radius:28px;max-width:600px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.35);transform:translateY(20px) scale(.97);transition:transform .35s cubic-bezier(0.34,1.56,0.64,1)}
+        .modal-overlay.open .post-modal{transform:translateY(0) scale(1)}
+        .modal-topbar{position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:14px;z-index:10;border-radius:28px 28px 0 0}
+        .btn-icon{width:36px;height:36px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);transition:var(--transition);font-size:14px}
+        .btn-icon:hover{background:var(--accent-soft);color:var(--accent);border-color:var(--border-accent)}
+        .modal-topbar-title{font-weight:800;font-size:1rem}
+        .modal-body{padding:20px}
+        .modal-author-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+        .modal-author-row img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)}
+        .modal-author-name{font-weight:800;font-size:1rem;display:flex;align-items:center;gap:5px}
+        .modal-author-handle{font-size:.8rem;color:var(--text-muted)}
+        .modal-content{font-size:1.15rem;line-height:1.65;margin-bottom:16px}
+        .modal-meta{display:flex;align-items:center;gap:6px;color:var(--text-muted);font-size:.82rem;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:14px}
+        .modal-stats{display:flex;gap:20px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:14px}
+        .modal-stat{font-size:.875rem;color:var(--text-muted)}
+        .modal-stat strong{color:var(--text);font-weight:800}
+        .modal-actions{display:flex;justify-content:space-around;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:14px}
+        .comments-section{padding:0 20px 20px}
+        .comment-input-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+        .comment-input-row img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex-shrink:0}
+        .comment-ta{flex:1;background:none;border:none;color:var(--text);font-family:'Poppins',sans-serif;font-size:.875rem;resize:none;min-height:36px;outline:none;line-height:1.5;padding-top:4px}
+        .comment-ta::placeholder{color:var(--text-muted)}
+        .btn-comment{align-self:flex-end;padding:7px 16px;border-radius:50px;background:var(--gradient);color:white;border:none;font-weight:700;font-size:.75rem;cursor:pointer;font-family:'Poppins',sans-serif}
+        .comment-item{display:flex;gap:12px;margin-bottom:16px;animation:fadeIn .3s ease both}
+        .comment-item img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0}
+        .comment-bubble{background:var(--surface-2);border:1px solid var(--border);border-radius:14px 14px 14px 4px;padding:10px 14px;flex:1}
+        .comment-author{font-weight:700;font-size:.8rem;display:flex;align-items:center;gap:4px}
+        .comment-handle{font-size:.7rem;color:var(--text-muted);margin-bottom:4px}
+        .comment-text{font-size:.85rem;line-height:1.5}
+
+        /* USERNAME MODAL */
+        .username-modal{background:var(--surface);border:1px solid var(--border-accent);border-radius:28px;max-width:460px;width:100%;padding:40px 36px;box-shadow:0 32px 80px rgba(0,0,0,.35),0 0 60px var(--accent-glow);transform:translateY(20px) scale(.97);transition:transform .35s cubic-bezier(0.34,1.56,0.64,1);text-align:center}
+        .modal-overlay.open .username-modal{transform:translateY(0) scale(1)}
+        .username-glyph{font-size:2.8rem;margin-bottom:16px;display:inline-block;background:var(--gradient-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .username-modal h2{font-size:1.4rem;font-weight:900;margin-bottom:8px;letter-spacing:-.02em}
+        .username-modal p{font-size:.875rem;color:var(--text-muted);font-weight:300;margin-bottom:28px;line-height:1.7}
+        .un-wrap{position:relative;margin-bottom:10px}
+        .un-at{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--accent);font-weight:800;font-size:1rem}
+        .un-input{width:100%;padding:14px 14px 14px 30px;border-radius:14px;border:1.5px solid var(--border-accent);background:var(--accent-soft);color:var(--text);font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600;outline:none;transition:var(--transition)}
+        .un-input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+        .un-input.error{border-color:#ff6b6b;background:rgba(255,107,107,.06)}
+        .un-input.ok{border-color:#30d158;background:rgba(48,209,88,.06)}
+        .un-status{display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;margin-bottom:24px;min-height:20px;justify-content:center}
+        .un-status.error{color:#ff6b6b}.un-status.ok{color:#30d158}.un-status.checking{color:var(--text-muted)}
+        .btn-claim{width:100%;padding:14px;border-radius:50px;background:var(--gradient);color:white;border:none;font-weight:800;font-size:.95rem;cursor:pointer;font-family:'Poppins',sans-serif;box-shadow:0 8px 28px var(--accent-glow);transition:var(--transition)}
+        .btn-claim:hover{transform:translateY(-2px)}
+        .btn-claim:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .un-rules{margin-top:16px;font-size:.72rem;color:var(--text-muted);line-height:1.7}
+
+        /* TOAST */
+        .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--border);border-radius:50px;padding:12px 24px;font-size:.875rem;font-weight:600;box-shadow:0 16px 48px rgba(0,0,0,.2);z-index:9999;display:flex;align-items:center;gap:10px;transition:transform .4s cubic-bezier(0.34,1.56,0.64,1),opacity .3s;opacity:0;white-space:nowrap}
+        .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+        .toast.success{border-color:rgba(48,209,88,.3)}.toast.success i{color:#30d158}
+        .toast.error{border-color:rgba(255,107,107,.3)}.toast.error i{color:#ff6b6b}
+
+        @media (max-width:1100px){.app-layout{grid-template-columns:72px 1fr 260px}.logo-name{display:none}.logo-wrap{padding:6px;justify-content:center}.nav-link span{display:none}.nav-link{justify-content:center;padding:13px}.sidebar-user-info,.sidebar-user>i{display:none}.btn-compose span{display:none}.btn-compose{width:44px;height:44px;border-radius:50%;padding:0}}
+        @media (max-width:768px){.app-layout{grid-template-columns:1fr}.sidebar-right{display:none}.sidebar-left{position:fixed;bottom:0;left:0;right:0;top:auto;height:auto;flex-direction:row;padding:8px 16px;z-index:400;border-top:1px solid var(--border);border-right:none;justify-content:space-around;align-items:center}.logo-wrap,.btn-compose,.sidebar-divider,.sidebar-user{display:none}.nav-links{flex-direction:row}.nav-link{padding:10px 14px}.main-feed{border:none}body{padding-bottom:68px}}
+    </style>
+</head>
+<body>
+<div class="app-layout">
+
+    <!-- LEFT SIDEBAR -->
+    <nav class="sidebar-left">
+        <a href="dashboard.html" class="logo-wrap">
+            <img src="images/aura-nobg.png" alt="Aura">
+            <span class="logo-name">Aura<span>Verse</span></span>
+        </a>
+        <button class="btn-compose" onclick="scrollToCompose()">
+            <i class="fa-solid fa-feather-pointed"></i><span>Pubblica</span>
+        </button>
+        <div class="nav-links">
+            <button class="nav-link active" id="nav-home" onclick="navClick(this,'forYou')"><i class="fa-solid fa-house"></i><span>Home</span></button>
+            <button class="nav-link" id="nav-explore" onclick="navClick(this,'explore')"><i class="fa-solid fa-magnifying-glass"></i><span>Esplora</span></button>
+            <button class="nav-link" id="nav-following" onclick="navClick(this,'following')"><i class="fa-solid fa-user-group"></i><span>Seguiti</span></button>
+            <button class="nav-link" id="nav-profile" onclick="goToMyProfile()"><i class="fa-solid fa-user"></i><span>Profilo</span></button>
+            <hr class="sidebar-divider" style="width:100%">
+            <a class="nav-link" href="account.html"><i class="fa-solid fa-gear"></i><span>Impostazioni</span></a>
+        </div>
+        <a class="sidebar-user" href="#" onclick="goToMyProfile();return false;">
+            <img id="sidebar-avatar" src="images/default.png" alt="">
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebar-name">...</div>
+                <div class="sidebar-user-handle" id="sidebar-handle">@...</div>
+            </div>
+            <i class="fa-solid fa-ellipsis"></i>
+        </a>
+    </nav>
+
+    <!-- MAIN FEED -->
+    <main class="main-feed">
+        <div class="feed-header">
+            <div class="feed-tabs">
+                <button class="feed-tab active" id="tab-forYou" onclick="switchFeed('forYou')">Per te</button>
+                <button class="feed-tab" id="tab-following" onclick="switchFeed('following')">Seguiti</button>
+                <button class="feed-tab" id="tab-trending" onclick="switchFeed('trending')">🔥 Trending</button>
+            </div>
+        </div>
+        <div class="compose-box" id="compose-box">
+            <img id="compose-avatar" src="images/default.png" alt="">
+            <div class="compose-right">
+                <textarea class="compose-textarea" id="compose-text" placeholder="Cosa sta succedendo?" maxlength="280" oninput="updateChar()"></textarea>
+                <div class="compose-actions">
+                    <div class="compose-tools">
+                        <button class="compose-tool" onclick="ins('✨')" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
+                        <button class="compose-tool" onclick="ins(' #')" title="Hashtag"><i class="fa-solid fa-hashtag"></i></button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:12px">
+                        <span class="char-count" id="char-count">280</span>
+                        <button class="btn-post" id="btn-post" onclick="publishPost()" disabled>Pubblica</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="feed-container"><div class="feed-loading"><div class="spinner"></div><span>Caricamento...</span></div></div>
+    </main>
+
+    <!-- RIGHT SIDEBAR -->
+    <aside class="sidebar-right">
+        <div class="search-wrap">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input class="search-input" type="text" placeholder="Cerca post, @persone, #tag..." id="search-input" oninput="handleSearch(this.value)" autocomplete="off">
+        </div>
+        <div class="search-results" id="search-results"></div>
+        <div class="widget-r">
+            <div class="widget-r-title">🔥 Trend del momento</div>
+            <div id="trending-list"><div style="text-align:center;padding:20px;color:var(--text-muted);font-size:.82rem">Caricamento...</div></div>
+        </div>
+        <div class="widget-r">
+            <div class="widget-r-title">✨ Da seguire</div>
+            <div id="suggested-list"><div style="text-align:center;padding:20px;color:var(--text-muted);font-size:.82rem">Caricamento...</div></div>
+        </div>
+        <div style="font-size:.68rem;color:var(--text-muted);line-height:1.8;padding:0 4px">
+            <a href="https://privacy.aurastudioitalia.it/privacypolicy.html" target="_blank" style="color:var(--text-muted);text-decoration:none">Privacy</a> · <a href="#" style="color:var(--text-muted);text-decoration:none">Termini</a> · Aura Studio Italia © 2025
+        </div>
+    </aside>
+</div>
+
+<!-- POST MODAL -->
+<div class="modal-overlay" id="postModal">
+    <div class="post-modal">
+        <div class="modal-topbar">
+            <button class="btn-icon" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            <span class="modal-topbar-title">Post</span>
+        </div>
+        <div class="modal-body">
+            <div class="modal-author-row">
+                <img id="m-avatar" src="images/default.png">
+                <div>
+                    <div class="modal-author-name" id="m-name">—</div>
+                    <div class="modal-author-handle" id="m-handle">@—</div>
+                </div>
+            </div>
+            <div class="modal-content" id="m-content"></div>
+            <div class="modal-meta"><span id="m-time">—</span><span>·</span><span id="m-views" style="font-weight:600;color:var(--text)">—</span></div>
+            <div class="modal-stats">
+                <div class="modal-stat"><strong id="m-likes">0</strong> Mi piace</div>
+                <div class="modal-stat"><strong id="m-comments">0</strong> Commenti</div>
+                <div class="modal-stat"><strong id="m-reposts">0</strong> Condivisioni</div>
+            </div>
+            <div class="modal-actions">
+                <button class="post-action" id="m-btn-like" onclick="likeModal()"><i class="fa-regular fa-heart"></i></button>
+                <button class="post-action" onclick="document.getElementById('m-comment-input').focus()"><i class="fa-regular fa-comment"></i></button>
+                <button class="post-action" onclick="repostModal()"><i class="fa-solid fa-retweet"></i></button>
+                <button class="post-action" id="m-btn-bm" onclick="bookmarkModal()"><i class="fa-regular fa-bookmark"></i></button>
+                <button class="post-action" onclick="shareActive()"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
+            </div>
+        </div>
+        <div class="comments-section">
+            <div class="comment-input-row">
+                <img id="m-comment-avatar" src="images/default.png">
+                <textarea class="comment-ta" id="m-comment-input" placeholder="Aggiungi un commento..."></textarea>
+                <button class="btn-comment" onclick="postComment()">Rispondi</button>
+            </div>
+            <div id="comments-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- USERNAME MODAL -->
+<div class="modal-overlay" id="usernameModal">
+    <div class="username-modal">
+        <div class="username-glyph"><i class="fa-solid fa-at"></i></div>
+        <h2>Scegli il tuo username</h2>
+        <p>Crea un handle unico per il tuo profilo AuraVerse. Gli altri potranno trovarti e menzionarti con <strong style="color:var(--accent)">@username</strong>.</p>
+        <div class="un-wrap">
+            <span class="un-at">@</span>
+            <input class="un-input" type="text" id="un-input" placeholder="iltuousername" maxlength="24" oninput="checkUN(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        </div>
+        <div class="un-status" id="un-status"></div>
+        <button class="btn-claim" id="btn-claim" onclick="claimUN()" disabled><i class="fa-solid fa-rocket"></i> Reclama @username</button>
+        <div class="un-rules">Solo lettere, numeri e _. Minimo 3, massimo 24 caratteri.</div>
+    </div>
+</div>
+
+<div class="toast" id="toast"><i id="toast-icon" class="fa-solid fa-check"></i><span id="toast-msg"></span></div>
+
+<script>
+/* FIREBASE */
+const firebaseConfig={apiKey:"AIzaSyDsrHAtIh5bsYDHa1wz0LMcmciChAoRikU",authDomain:"myauraid-f03c6.firebaseapp.com",projectId:"myauraid-f03c6",storageBucket:"myauraid-f03c6.appspot.com",messagingSenderId:"190478237725",appId:"1:190478237725:web:0d39907473f511b85a06f4"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(), db=firebase.firestore();
+
+/* STATE */
+let ME=null, myData={}, myUsername=null, myVerified=false;
+let currentTab='forYou', activePostId=null;
+let likedPosts=new Set(), bookmarks=new Set(), followingUIDs=new Set();
+let unTimer=null, unValid=false, searchTimer=null;
+
+/* TOAST */
+let toastTimer;
+function toast(msg,type='success'){
+    const t=document.getElementById('toast');
+    document.getElementById('toast-msg').textContent=msg;
+    document.getElementById('toast-icon').className=type==='success'?'fa-solid fa-check':'fa-solid fa-xmark';
+    t.className=`toast ${type} show`;
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+/* HELPERS */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fmt(txt){
+    return esc(txt)
+        .replace(/(#\w+)/g,'<span class="hashtag" onclick="event.stopPropagation();searchTag(\'$1\')">$1</span>')
+        .replace(/(@\w+)/g,'<span class="mention" onclick="event.stopPropagation();goUser(\'$1\')">$1</span>')
+        .replace(/\n/g,'<br>');
+}
+function ago(d){const s=Math.floor((Date.now()-d)/1000);if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';return d.toLocaleDateString('it-IT',{day:'numeric',month:'short'})}
+function fullDate(d){return d.toLocaleString('it-IT',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'long',year:'numeric'})}
+function vBadge(v){return v?' <i class="verified-icon fa-solid fa-circle-check"></i>':''}
+
+/* AUTH */
+auth.onAuthStateChanged(async user=>{
+    if(!user){window.location.href='index.html';return}
+    ME=user;
+    const snap=await db.collection('users').doc(user.uid).get();
+    if(snap.exists) myData=snap.data();
+
+    // Username
+    const nSnap=await db.collection('nicknames').where('uid','==',user.uid).limit(1).get();
+    if(!nSnap.empty) myUsername=nSnap.docs[0].id;
+    else document.getElementById('usernameModal').classList.add('open');
+
+    // Verified
+    const vSnap=await db.collection('users').doc(user.uid).collection('verse').doc('verified').get().catch(()=>null);
+    myVerified=vSnap?.exists && vSnap.data().verified===true;
+
+    // Following: users/{uid}/verse/{targetUID} where type=='follow'
+    await loadFollowing();
+
+    // Bookmarks
+    const bmSnap=await db.collection('users').doc(user.uid).collection('bookmarks').get().catch(()=>({docs:[]}));
+    bmSnap.docs.forEach(d=>bookmarks.add(d.id));
+
+    // UI
+    const name=`${myData.nome||''} ${myData.cognome||''}`.trim()||'Utente Aura';
+    const avatar=myData.profileImage||'images/default.png';
+    document.getElementById('sidebar-name').textContent=name;
+    document.getElementById('sidebar-handle').textContent=myUsername?`@${myUsername}`:'@...';
+    document.getElementById('sidebar-avatar').src=avatar;
+    document.getElementById('compose-avatar').src=avatar;
+    document.getElementById('m-comment-avatar').src=avatar;
+
+    loadFeed(); loadTrending(); loadSuggested();
+});
+
+/* FOLLOWING - path: users/{uid}/verse/{targetUID} { type:'follow', since:... } */
+async function loadFollowing(){
+    followingUIDs.clear();
+    try{
+        const snap=await db.collection('users').doc(ME.uid).collection('verse').where('type','==','follow').get();
+        snap.forEach(d=>followingUIDs.add(d.id));
+    }catch(e){}
+}
+async function followUser(targetUID,btn){
+    if(!ME||targetUID===ME.uid)return;
+    const ref=db.collection('users').doc(ME.uid).collection('verse').doc(targetUID);
+    if(followingUIDs.has(targetUID)){
+        await ref.delete(); followingUIDs.delete(targetUID);
+        if(btn){btn.textContent='Segui';btn.classList.remove('following')}
+        toast('Non stai più seguendo questo utente.','success');
+    } else {
+        await ref.set({type:'follow',since:firebase.firestore.FieldValue.serverTimestamp()});
+        followingUIDs.add(targetUID);
+        if(btn){btn.textContent='Seguito ✓';btn.classList.add('following')}
+        toast('Stai seguendo un nuovo utente! 👋','success');
+    }
+}
+
+/* COMPOSE */
+function scrollToCompose(){document.getElementById('compose-box').scrollIntoView({behavior:'smooth'});setTimeout(()=>document.getElementById('compose-text').focus(),400)}
+function ins(s){const ta=document.getElementById('compose-text');ta.value+=s;updateChar();ta.focus()}
+function updateChar(){
+    const ta=document.getElementById('compose-text');
+    const left=280-ta.value.length;
+    const el=document.getElementById('char-count');
+    el.textContent=left;
+    el.className='char-count'+(left<20?(left<0?' danger':' warn'):'');
+    document.getElementById('btn-post').disabled=ta.value.trim().length===0||left<0;
+}
+async function publishPost(){
+    const text=document.getElementById('compose-text').value.trim();
+    if(!text||!ME)return;
+    const btn=document.getElementById('btn-post');
+    btn.disabled=true;btn.textContent='...';
+    try{
+        await db.collection('verse').add({
+            contenuto:text,proprietario:ME.uid,
+            username:myUsername||'',
+            authorName:`${myData.nome||''} ${myData.cognome||''}`.trim()||'Utente Aura',
+            authorAvatar:myData.profileImage||'',
+            authorVerified:myVerified,
+            timestamp:firebase.firestore.FieldValue.serverTimestamp(),
+            likesCount:0,commentsCount:0,repostsCount:0,views:0
+        });
+        document.getElementById('compose-text').value='';updateChar();
+        toast('Post pubblicato! ✨','success');loadFeed();
+    }catch(e){toast('Errore: '+e.message,'error')}
+    btn.disabled=false;btn.textContent='Pubblica';
+}
+
+/* FEED */
+async function loadFeed(){
+    const c=document.getElementById('feed-container');
+    c.innerHTML='<div class="feed-loading"><div class="spinner"></div><span>Caricamento...</span></div>';
+    try{
+        let snap;
+        if(currentTab==='trending'){
+            snap=await db.collection('verse').orderBy('likesCount','desc').limit(30).get();
+        } else if(currentTab==='following'){
+            if(followingUIDs.size===0){
+                c.innerHTML=`<div class="empty-state"><span class="empty-icon"><i class="fa-solid fa-user-group"></i></span><h3>Nessuno da seguire ancora</h3><p>Segui altri utenti per vedere i loro post qui.</p></div>`;return;
+            }
+            const uids=[...followingUIDs].slice(0,30);
+            snap=await db.collection('verse').where('proprietario','in',uids).orderBy('timestamp','desc').limit(30).get();
+        } else {
+            snap=await db.collection('verse').orderBy('timestamp','desc').limit(40).get();
+        }
+        if(snap.empty){
+            c.innerHTML=`<div class="empty-state"><span class="empty-icon"><i class="fa-solid fa-satellite-dish"></i></span><h3>Nessun post ancora</h3><p>Sii il primo a scrivere qualcosa!</p></div>`;return;
+        }
+        // Check liked status
+        const ids=snap.docs.map(d=>d.id);
+        await Promise.all(ids.map(id=>
+            db.collection('verse').doc(id).collection('likes').doc(ME.uid).get()
+                .then(s=>{if(s.exists)likedPosts.add(id);else likedPosts.delete(id)})
+                .catch(()=>{})
+        ));
+        c.innerHTML='';
+        let delay=0;
+        snap.forEach(doc=>{c.appendChild(buildCard({id:doc.id,...doc.data()},delay));delay+=35});
+    }catch(e){c.innerHTML=`<div class="empty-state"><p style="color:var(--text-muted)">Errore: ${esc(e.message)}</p></div>`}
+}
+
+/* BUILD CARD */
+function buildCard(data,delay=0){
+    const card=document.createElement('div');
+    card.className='post-card';card.style.animationDelay=delay+'ms';
+    const avatar=data.authorAvatar||'images/default.png';
+    const name=data.authorName||'Utente';
+    const handle=data.username||'';
+    const time=data.timestamp?ago(data.timestamp.toDate()):'';
+    const isLiked=likedPosts.has(data.id);
+    const isBm=bookmarks.has(data.id);
+    const isOwn=data.proprietario===ME?.uid;
+    const v=vBadge(data.authorVerified);
+    card.innerHTML=`
+        <img class="post-avatar" src="${esc(avatar)}" onerror="this.src='images/default.png'" alt="">
+        <div class="post-body">
+            <div class="post-header">
+                <a class="post-author-name" href="profile.html?user=${esc(handle)}" onclick="event.stopPropagation()">${esc(name)}${v}</a>
+                <span class="post-handle">@${esc(handle)}</span>
+                <span class="post-dot">·</span>
+                <span class="post-time">${time}</span>
+                <div class="post-menu-wrap">
+                    <button class="post-menu-btn" onclick="event.stopPropagation();toggleMenu('${data.id}',this)"><i class="fa-solid fa-ellipsis"></i></button>
+                    <div class="dropdown" id="menu-${data.id}" style="display:none">
+                        <div class="dd-item" onclick="copyLink('${data.id}')"><i class="fa-solid fa-link"></i>Copia link</div>
+                        <div class="dd-item" onclick="shareNative('${data.id}')"><i class="fa-solid fa-arrow-up-from-bracket"></i>Condividi</div>
+                        ${isOwn?`<div class="dd-item danger" onclick="deletePost('${data.id}',event)"><i class="fa-solid fa-trash"></i>Elimina</div>`:`<div class="dd-item danger" onclick="reportPost('${data.id}')"><i class="fa-solid fa-flag"></i>Segnala</div>`}
+                    </div>
+                </div>
+            </div>
+            <div class="post-content">${fmt(data.contenuto||'')}</div>
+            <div class="post-actions">
+                <button class="post-action" onclick="event.stopPropagation();openPost('${data.id}')"><i class="fa-regular fa-comment"></i>${data.commentsCount||0}</button>
+                <button class="post-action" onclick="event.stopPropagation();repost('${data.id}',this)"><i class="fa-solid fa-retweet"></i><span>${data.repostsCount||0}</span></button>
+                <button class="post-action${isLiked?' liked':''}" id="like-${data.id}" onclick="event.stopPropagation();likePost('${data.id}',this)">
+                    <i class="fa-${isLiked?'solid':'regular'} fa-heart"></i><span>${data.likesCount||0}</span>
+                </button>
+                <button class="post-action${isBm?' bookmarked':''}" id="bm-${data.id}" onclick="event.stopPropagation();toggleBm('${data.id}',this)">
+                    <i class="fa-${isBm?'solid':'regular'} fa-bookmark"></i>
+                </button>
+            </div>
+        </div>`;
+    card.addEventListener('click',()=>openPost(data.id));
+    return card;
+}
+
+/* LIKE */
+async function likePost(postId,btn){
+    if(!ME)return;
+    const likeRef=db.collection('verse').doc(postId).collection('likes').doc(ME.uid);
+    const postRef=db.collection('verse').doc(postId);
+    const snap=await likeRef.get();
+    const span=btn.querySelector('span');const icon=btn.querySelector('i');
+    const n=parseInt(span.textContent)||0;
+    if(snap.exists){
+        await likeRef.delete();await postRef.update({likesCount:firebase.firestore.FieldValue.increment(-1)});
+        btn.classList.remove('liked');icon.className='fa-regular fa-heart';span.textContent=Math.max(0,n-1);likedPosts.delete(postId);
+    }else{
+        await likeRef.set({uid:ME.uid,ts:firebase.firestore.FieldValue.serverTimestamp()});
+        await postRef.update({likesCount:firebase.firestore.FieldValue.increment(1)});
+        btn.classList.add('liked');icon.className='fa-solid fa-heart';span.textContent=n+1;likedPosts.add(postId);
+    }
+}
+
+/* REPOST */
+async function repost(postId,btn){
+    try{
+        await db.collection('verse').doc(postId).update({repostsCount:firebase.firestore.FieldValue.increment(1)});
+        const span=btn.querySelector('span');if(span)span.textContent=parseInt(span.textContent||'0')+1;
+        toast('Post condiviso! 🔄','success');
+    }catch(e){}
+}
+
+/* BOOKMARK */
+async function toggleBm(postId,btn){
+    if(!ME)return;
+    const ref=db.collection('users').doc(ME.uid).collection('bookmarks').doc(postId);
+    const icon=btn.querySelector('i');
+    if(bookmarks.has(postId)){
+        await ref.delete();bookmarks.delete(postId);
+        btn.classList.remove('bookmarked');icon.className='fa-regular fa-bookmark';
+        toast('Rimosso dai segnalibri','success');
+    }else{
+        await ref.set({savedAt:firebase.firestore.FieldValue.serverTimestamp()});
+        bookmarks.add(postId);btn.classList.add('bookmarked');icon.className='fa-solid fa-bookmark';
+        toast('Aggiunto ai segnalibri 🔖','success');
+    }
+}
+
+/* DELETE / REPORT */
+async function deletePost(postId,event){
+    event.stopPropagation();
+    if(!confirm('Eliminare questo post definitivamente?'))return;
+    await db.collection('verse').doc(postId).delete();
+    toast('Post eliminato.','success');loadFeed();
+}
+function reportPost(postId){
+    db.collection('reports').add({postId,uid:ME?.uid,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+    toast('Post segnalato.','success');
+}
+
+/* MENU */
+function toggleMenu(postId,btn){
+    const menu=document.getElementById('menu-'+postId);
+    const isOpen=menu.style.display!=='none';
+    document.querySelectorAll('.dropdown').forEach(m=>m.style.display='none');
+    if(!isOpen){
+        menu.style.display='block';
+        setTimeout(()=>document.addEventListener('click',function c(){menu.style.display='none';document.removeEventListener('click',c)},{once:true}),10);
+    }
+}
+function copyLink(postId){navigator.clipboard.writeText(`${location.origin}/verse.html?post=${postId}`);toast('Link copiato!','success')}
+function shareNative(postId){const url=`${location.origin}/verse.html?post=${postId}`;if(navigator.share)navigator.share({title:'Post su AuraVerse',url});else{navigator.clipboard.writeText(url);toast('Link copiato!','success')}}
+function shareActive(){if(activePostId)shareNative(activePostId)}
+
+/* OPEN POST */
+async function openPost(postId){
+    activePostId=postId;
+    const snap=await db.collection('verse').doc(postId).get();
+    if(!snap.exists)return;
+    const data={id:snap.id,...snap.data()};
+    const v=vBadge(data.authorVerified);
+    document.getElementById('m-avatar').src=data.authorAvatar||'images/default.png';
+    document.getElementById('m-name').innerHTML=esc(data.authorName||'')+v;
+    document.getElementById('m-handle').textContent='@'+(data.username||'');
+    document.getElementById('m-content').innerHTML=fmt(data.contenuto||'');
+    document.getElementById('m-likes').textContent=data.likesCount||0;
+    document.getElementById('m-comments').textContent=data.commentsCount||0;
+    document.getElementById('m-reposts').textContent=data.repostsCount||0;
+    document.getElementById('m-views').textContent=`${(data.views||0)+1} visualizzazioni`;
+    document.getElementById('m-time').textContent=data.timestamp?fullDate(data.timestamp.toDate()):'';
+    const [ls,bs]=await Promise.all([
+        db.collection('verse').doc(postId).collection('likes').doc(ME.uid).get(),
+        db.collection('users').doc(ME.uid).collection('bookmarks').doc(postId).get()
+    ]);
+    const lb=document.getElementById('m-btn-like');
+    lb.className=ls.exists?'post-action liked':'post-action';
+    lb.querySelector('i').className=ls.exists?'fa-solid fa-heart':'fa-regular fa-heart';
+    const bb=document.getElementById('m-btn-bm');
+    bb.className=bs.exists?'post-action bookmarked':'post-action';
+    bb.querySelector('i').className=bs.exists?'fa-solid fa-bookmark':'fa-regular fa-bookmark';
+    db.collection('verse').doc(postId).update({views:firebase.firestore.FieldValue.increment(1)}).catch(()=>{});
+    loadComments(postId);
+    document.getElementById('postModal').classList.add('open');
+    document.body.style.overflow='hidden';
+}
+function closeModal(){document.getElementById('postModal').classList.remove('open');document.body.style.overflow='';activePostId=null}
+document.getElementById('postModal').addEventListener('click',e=>{if(e.target===document.getElementById('postModal'))closeModal()});
+
+async function likeModal(){
+    if(!activePostId)return;
+    const btn=document.getElementById('m-btn-like');
+    const ref=db.collection('verse').doc(activePostId).collection('likes').doc(ME.uid);
+    const snap=await ref.get();const n=parseInt(document.getElementById('m-likes').textContent)||0;
+    if(snap.exists){await ref.delete();await db.collection('verse').doc(activePostId).update({likesCount:firebase.firestore.FieldValue.increment(-1)});btn.className='post-action';btn.querySelector('i').className='fa-regular fa-heart';document.getElementById('m-likes').textContent=Math.max(0,n-1)}
+    else{await ref.set({uid:ME.uid,ts:firebase.firestore.FieldValue.serverTimestamp()});await db.collection('verse').doc(activePostId).update({likesCount:firebase.firestore.FieldValue.increment(1)});btn.className='post-action liked';btn.querySelector('i').className='fa-solid fa-heart';document.getElementById('m-likes').textContent=n+1}
+}
+async function bookmarkModal(){if(!activePostId)return;await toggleBm(activePostId,document.getElementById('m-btn-bm'))}
+async function repostModal(){
+    if(!activePostId)return;
+    await db.collection('verse').doc(activePostId).update({repostsCount:firebase.firestore.FieldValue.increment(1)}).catch(()=>{});
+    document.getElementById('m-reposts').textContent=parseInt(document.getElementById('m-reposts').textContent||'0')+1;
+    toast('Post condiviso! 🔄','success');
+}
+
+/* COMMENTS */
+async function loadComments(postId){
+    const el=document.getElementById('comments-list');
+    el.innerHTML='<div class="feed-loading" style="padding:20px"><div class="spinner"></div></div>';
+    try{
+        const snap=await db.collection('verse').doc(postId).collection('commenti').orderBy('timestamp','asc').limit(50).get();
+        el.innerHTML='';
+        if(snap.empty){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:.82rem">Nessun commento ancora. Sii il primo! 💬</div>';return}
+        snap.forEach(doc=>{
+            const c=doc.data();const v=vBadge(c.authorVerified);
+            const item=document.createElement('div');item.className='comment-item';
+            item.innerHTML=`<img src="${esc(c.authorAvatar||'images/default.png')}" onerror="this.src='images/default.png'">
+                <div class="comment-bubble">
+                    <div class="comment-author">${esc(c.authorName||'Utente')}${v}</div>
+                    <div class="comment-handle">@${esc(c.username||'')} · ${c.timestamp?ago(c.timestamp.toDate()):''}</div>
+                    <div class="comment-text">${fmt(c.contenuto||'')}</div>
+                </div>`;
+            el.appendChild(item);
+        });
+    }catch(e){}
+}
+async function postComment(){
+    const text=document.getElementById('m-comment-input').value.trim();
+    if(!text||!ME||!activePostId)return;
+    try{
+        await db.collection('verse').doc(activePostId).collection('commenti').add({
+            contenuto:text,
+            authorName:`${myData.nome||''} ${myData.cognome||''}`.trim()||'Utente Aura',
+            username:myUsername||'',authorAvatar:myData.profileImage||'',
+            authorVerified:myVerified,uid:ME.uid,
+            timestamp:firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await db.collection('verse').doc(activePostId).update({commentsCount:firebase.firestore.FieldValue.increment(1)});
+        document.getElementById('m-comment-input').value='';
+        document.getElementById('m-comments').textContent=parseInt(document.getElementById('m-comments').textContent||'0')+1;
+        loadComments(activePostId);toast('Commento pubblicato!','success');
+    }catch(e){toast('Errore: '+e.message,'error')}
+}
+
+/* TRENDING */
+async function loadTrending(){
+    const el=document.getElementById('trending-list');
+    try{
+        const snap=await db.collection('verse').orderBy('timestamp','desc').limit(60).get();
+        const tags={};
+        snap.forEach(doc=>{
+            (doc.data().contenuto||'').match(/#\w+/g||[])?.forEach(t=>{const k=t.toLowerCase();tags[k]=(tags[k]||0)+1});
+        });
+        const sorted=Object.entries(tags).sort((a,b)=>b[1]-a[1]).slice(0,6);
+        if(!sorted.length){el.innerHTML='<div style="font-size:.82rem;color:var(--text-muted);text-align:center;padding:12px">Ancora nessun hashtag.</div>';return}
+        el.innerHTML=sorted.map(([tag,count],i)=>`<div class="trend-item" onclick="searchTag('${esc(tag)}')"><div class="trend-cat">Trending · #${i+1}</div><div class="trend-tag">${esc(tag)}</div><div class="trend-count">${count} post</div></div>`).join('');
+    }catch(e){el.innerHTML=''}
+}
+
+/* SUGGESTED */
+async function loadSuggested(){
+    const el=document.getElementById('suggested-list');
+    try{
+        const snap=await db.collection('users').limit(6).get();
+        el.innerHTML='';
+        for(const doc of snap.docs){
+            if(doc.id===ME?.uid)continue;
+            const d=doc.data();
+            const name=`${d.nome||''} ${d.cognome||''}`.trim()||'Utente Aura';
+            const uname=d.username||'';
+            const avatar=d.profileImage||'images/default.png';
+            const isF=followingUIDs.has(doc.id);
+            const vSnap=await db.collection('users').doc(doc.id).collection('verse').doc('verified').get().catch(()=>null);
+            const isV=vSnap?.exists&&vSnap.data().verified===true;
+            const item=document.createElement('div');item.className='follow-item';
+            item.innerHTML=`<img src="${esc(avatar)}" onerror="this.src='images/default.png'">
+                <div class="follow-info">
+                    <div class="follow-name">${esc(name)}${isV?vBadge(true):''}</div>
+                    <div class="follow-handle">${uname?'@'+esc(uname):''}</div>
+                </div>
+                <button class="btn-follow${isF?' following':''}" onclick="followUser('${doc.id}',this)">${isF?'Seguito ✓':'Segui'}</button>`;
+            el.appendChild(item);
+        }
+        if(!el.children.length)el.innerHTML='<div style="font-size:.82rem;color:var(--text-muted);text-align:center;padding:12px">Nessun utente trovato.</div>';
+    }catch(e){}
+}
+
+/* SEARCH */
+async function handleSearch(val){
+    const el=document.getElementById('search-results');
+    val=val.trim();
+    if(!val){el.classList.remove('open');el.innerHTML='';return}
+    clearTimeout(searchTimer);
+    el.innerHTML='<div style="padding:16px;text-align:center"><div class="spinner" style="margin:auto"></div></div>';
+    el.classList.add('open');
+    searchTimer=setTimeout(async()=>{
+        try{
+            const isTag=val.startsWith('#');const isMention=val.startsWith('@');
+            const term=isMention?val.slice(1):val;
+            let html='';
+
+            // USERS (search by username prefix)
+            if(!isTag){
+                const uSnap=await db.collection('nicknames').orderBy(firebase.firestore.FieldPath.documentId()).startAt(term.toLowerCase()).endAt(term.toLowerCase()+'\uf8ff').limit(5).get();
+                if(!uSnap.empty){
+                    html+=`<div class="sri-section">Persone</div>`;
+                    for(const doc of uSnap.docs){
+                        const uid=doc.data().uid;
+                        const ud=await db.collection('users').doc(uid).get().catch(()=>null);
+                        const d=ud?.data()||{};
+                        const name=`${d.nome||''} ${d.cognome||''}`.trim()||'Utente Aura';
+                        const avatar=d.profileImage||'images/default.png';
+                        const vSnap=await db.collection('users').doc(uid).collection('verse').doc('verified').get().catch(()=>null);
+                        const isV=vSnap?.exists&&vSnap.data().verified===true;
+                        html+=`<div class="sri-item" onclick="window.location.href='profile.html?user=${esc(doc.id)}'">
+                            <img src="${esc(avatar)}" onerror="this.src='images/default.png'">
+                            <div><div class="sri-name">${esc(name)}${isV?vBadge(true):''}</div><div class="sri-sub">@${esc(doc.id)}</div></div>
+                        </div>`;
+                    }
+                }
+            }
+
+            // POSTS
+            const pSnap=await db.collection('verse').orderBy('contenuto').startAt(isTag?val:term).endAt((isTag?val:term)+'\uf8ff').limit(8).get();
+            if(!pSnap.empty){
+                html+=`<div class="sri-section">${isTag?'Post con '+esc(val):'Post'}</div>`;
+                pSnap.forEach(doc=>{
+                    const d=doc.data();
+                    const preview=(d.contenuto||'').slice(0,60)+((d.contenuto||'').length>60?'...':'');
+                    html+=`<div class="sri-item" onclick="openPost('${doc.id}')">
+                        <img src="${esc(d.authorAvatar||'images/default.png')}" onerror="this.src='images/default.png'">
+                        <div><div class="sri-name">@${esc(d.username||'')}</div><div class="sri-sub">${esc(preview)}</div></div>
+                    </div>`;
+                });
+            }
+            if(!html)html=`<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.82rem">Nessun risultato per "${esc(val)}"</div>`;
+            el.innerHTML=html;
+        }catch(e){el.innerHTML='<div style="padding:16px;color:var(--text-muted);font-size:.82rem">Errore nella ricerca.</div>'}
+    },450);
+}
+document.addEventListener('click',e=>{
+    const sr=document.getElementById('search-results');
+    if(!document.getElementById('search-input').contains(e.target)&&!sr.contains(e.target)){sr.classList.remove('open');sr.innerHTML=''}
+});
+function searchTag(tag){document.getElementById('search-input').value=tag;handleSearch(tag)}
+function goUser(mention){window.location.href='profile.html?user='+mention.replace('@','')}
+
+/* TABS */
+function switchFeed(tab){
+    currentTab=tab;
+    document.querySelectorAll('.feed-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+    loadFeed();
+}
+function navClick(btn,tab){
+    document.querySelectorAll('.nav-link').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    if(tab==='explore')document.getElementById('search-input').focus();
+    else if(tab==='following')switchFeed('following');
+    else switchFeed('forYou');
+}
+
+/* USERNAME */
+function checkUN(val){
+    val=val.toLowerCase().replace(/[^a-z0-9_]/g,'');
+    document.getElementById('un-input').value=val;
+    const st=document.getElementById('un-status');const btn=document.getElementById('btn-claim');const inp=document.getElementById('un-input');
+    unValid=false;btn.disabled=true;inp.className='un-input';
+    if(val.length<3){st.textContent=val.length?'Minimo 3 caratteri':'';st.className='un-status error';return}
+    st.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Controllo...';st.className='un-status checking';
+    clearTimeout(unTimer);
+    unTimer=setTimeout(async()=>{
+        const snap=await db.collection('nicknames').doc(val).get();
+        if(snap.exists){st.innerHTML='<i class="fa-solid fa-xmark"></i> Non disponibile';st.className='un-status error';inp.className='un-input error'}
+        else{st.innerHTML=`<i class="fa-solid fa-check"></i> @${val} è disponibile!`;st.className='un-status ok';inp.className='un-input ok';unValid=true;btn.disabled=false}
+    },500);
+}
+async function claimUN(){
+    const val=document.getElementById('un-input').value;
+    if(!unValid||!ME)return;
+    const btn=document.getElementById('btn-claim');btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';
+    try{
+        const snap=await db.collection('nicknames').doc(val).get();
+        if(snap.exists){toast('Username preso. Scegline un altro.','error');btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-rocket"></i> Reclama @username';return}
+        await db.collection('nicknames').doc(val).set({uid:ME.uid,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+        await db.collection('users').doc(ME.uid).update({username:val});
+        myUsername=val;document.getElementById('sidebar-handle').textContent=`@${val}`;
+        document.getElementById('usernameModal').classList.remove('open');
+        toast(`Benvenuto su AuraVerse, @${val}! ✨`,'success');
+    }catch(e){toast('Errore: '+e.message,'error');btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-rocket"></i> Reclama @username'}
+}
+document.getElementById('usernameModal').addEventListener('click',e=>{if(e.target===document.getElementById('usernameModal')&&myUsername)document.getElementById('usernameModal').classList.remove('open')});
+
+/* MISC */
+function goToMyProfile(){if(myUsername)window.location.href=`profile.html?user=${myUsername}`;else{toast('Imposta prima un username!','error');document.getElementById('usernameModal').classList.add('open')}}
+document.addEventListener('keydown',e=>{
+    if(e.key==='Escape')closeModal();
+    if(e.key==='n'&&!['TEXTAREA','INPUT'].includes(document.activeElement.tagName))scrollToCompose();
+});
+</script>
+</body>
+</html>
