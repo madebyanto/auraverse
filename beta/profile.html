@@ -54,7 +54,7 @@
         .sidebar-user:hover { border-color: var(--border-accent); background: var(--accent-soft); }
         .sidebar-user img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); flex-shrink: 0; }
         .sidebar-user-info { flex: 1; min-width: 0; }
-        .sidebar-user-name { font-weight: 700; font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sidebar-user-name { font-weight: 700; font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px; }
         .sidebar-user-handle { font-size: .72rem; color: var(--text-muted); }
 
         /* MAIN */
@@ -87,19 +87,18 @@
         .btn-edit-main:hover { border-color: var(--border-accent); background: var(--accent-soft); color: var(--accent); }
 
         .profile-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
-        .profile-name { font-size: 1.25rem; font-weight: 900; letter-spacing: -.02em; }
-        .verified-badge { color: var(--accent); font-size: 18px; }
+        .profile-name { font-size: 1.25rem; font-weight: 900; letter-spacing: -.02em; display: flex; align-items: center; gap: 6px; }
+        .verified-icon { color: var(--accent); font-size: 16px; cursor: pointer; transition: transform 0.2s; }
+        .verified-icon:hover { transform: scale(1.1); }
 
         /* BADGE PILL */
-        .badge-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 50px; font-size: .7rem; font-weight: 700; background: var(--accent-soft); color: var(--accent); border: 1px solid var(--border-accent); }
+        .badge-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 50px; font-size: .7rem; font-weight: 700; background: var(--accent-soft); color: var(--accent); border: 1px solid var(--border-accent); margin-left: 4px; }
 
         .profile-handle { font-size: .875rem; color: var(--text-muted); margin-bottom: 10px; }
-        .profile-bio { font-size: .9rem; line-height: 1.6; margin-bottom: 12px; font-weight: 300; max-width: 480px; }
-        .profile-meta { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; font-size: .78rem; color: var(--text-muted); }
-        .profile-meta span { display: flex; align-items: center; gap: 5px; }
-        .profile-meta i { color: var(--accent); }
+        .profile-bio { font-size: .9rem; line-height: 1.6; margin-bottom: 16px; font-weight: 300; max-width: 480px; }
         .profile-stats { display: flex; gap: 22px; font-size: .875rem; }
-        .pstat { cursor: pointer; }
+        .pstat { cursor: pointer; padding: 4px; border-radius: 8px; transition: background 0.2s; }
+        .pstat:hover { background: var(--surface-2); }
         .pstat strong { font-weight: 800; margin-right: 3px; }
         .pstat span { color: var(--text-muted); }
         .pstat:hover strong { color: var(--accent); }
@@ -127,12 +126,16 @@
         .post-content { font-size: .935rem; line-height: 1.65; margin-bottom: 12px; word-break: break-word; }
         .post-content .hashtag { color: var(--accent); font-weight: 500; }
         .post-content .mention { color: var(--accent); font-weight: 500; }
+        
         .post-actions { display: flex; gap: 2px; margin-left: -8px; }
         .post-action { display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 50px; border: none; background: none; color: var(--text-muted); font-size: .8rem; font-weight: 500; font-family: 'Poppins', sans-serif; cursor: pointer; transition: var(--transition); }
         .post-action i { font-size: 14px; }
         .post-action:hover { background: var(--accent-soft); color: var(--accent); }
-        .post-action.liked { color: #ff3b30; }
+        .post-action.liked { color: #ff6b6b; }
+        .post-action.reposted { color: #30d158; }
         .post-action.danger { color: #ff6b6b; }
+        .post-action.liked i { animation: heartPop .35s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes heartPop { 0%{transform:scale(1)} 50%{transform:scale(1.45)} 100%{transform:scale(1)} }
 
         /* EMPTY */
         .empty-state { text-align: center; padding: 60px 32px; }
@@ -154,6 +157,23 @@
         .btn-follow { padding: 6px 14px; border-radius: 50px; border: 1.5px solid var(--border-accent); background: none; color: var(--accent); font-weight: 700; font-size: .72rem; cursor: pointer; font-family: 'Poppins', sans-serif; transition: var(--transition); }
         .btn-follow:hover { background: var(--accent); color: white; border-color: var(--accent); }
         .btn-follow.following { background: var(--accent-soft); }
+
+        /* MODALS */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); backdrop-filter: blur(10px); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .generic-modal { background: var(--surface); border: 1px solid var(--border-accent); border-radius: 28px; max-width: 460px; width: 100%; padding: 40px 36px; box-shadow: 0 32px 80px rgba(0,0,0,.35), 0 0 60px var(--accent-glow); transform: translateY(20px) scale(.97); transition: transform .35s cubic-bezier(0.34,1.56,0.64,1); text-align: center; }
+        .modal-overlay.open .generic-modal { transform: translateY(0) scale(1); }
+        .username-glyph { font-size: 3.5rem; margin-bottom: 16px; display: inline-block; color: var(--accent); }
+        .generic-modal h2 { font-size: 1.4rem; font-weight: 900; margin-bottom: 8px; letter-spacing: -.02em; }
+        .generic-modal p { font-size: .875rem; color: var(--text-muted); font-weight: 300; margin-bottom: 28px; line-height: 1.7; }
+        .btn-claim { width: 100%; padding: 14px; border-radius: 50px; background: var(--gradient); color: white; border: none; font-weight: 800; font-size: .95rem; cursor: pointer; font-family: 'Poppins', sans-serif; box-shadow: 0 8px 28px var(--accent-glow); transition: var(--transition); }
+        .btn-claim:hover { transform: translateY(-2px); }
+
+        .list-modal-container { padding: 0; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh; max-width: 500px; text-align: left; }
+        .modal-topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; gap: 14px; z-index: 10; border-radius: 28px 28px 0 0; }
+        .btn-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: var(--transition); font-size: 14px; }
+        .btn-icon:hover { background: var(--accent-soft); color: var(--accent); border-color: var(--border-accent); }
+        .modal-topbar-title { font-weight: 800; font-size: 1rem; }
 
         /* TOAST */
         .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--surface); border: 1px solid var(--border); border-radius: 50px; padding: 12px 24px; font-size: .875rem; font-weight: 600; box-shadow: 0 16px 48px rgba(0,0,0,.2); z-index: 9999; display: flex; align-items: center; gap: 10px; transition: transform .4s cubic-bezier(0.34,1.56,0.64,1), opacity .3s; opacity: 0; white-space: nowrap; }
@@ -183,16 +203,14 @@
 <body>
 <div class="app-layout">
 
-    <!-- SIDEBAR LEFT -->
     <nav class="sidebar-left">
         <a href="dashboard.html" class="logo-wrap">
-            <img src="images/aura-nobg.png" alt="Aura">
+            <img src="media/auraverse-new.png" alt="Aura">
             <span class="logo-name">Aura<span>Verse</span></span>
         </a>
         <div class="nav-links">
             <a class="nav-link" href="dashboard.html"><i class="fa-solid fa-house"></i> <span>Home</span></a>
             <a class="nav-link" href="dashboard.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Esplora</span></a>
-            <button class="nav-link" onclick="window.location.href='notifications.html'"><i class="fa-solid fa-bell"></i> <span>Notifiche</span></button>
             <button class="nav-link active"><i class="fa-solid fa-user"></i> <span>Profilo</span></button>
             <hr class="sidebar-divider" style="width:100%">
             <a class="nav-link" href="account.html"><i class="fa-solid fa-gear"></i> <span>Impostazioni</span></a>
@@ -206,7 +224,6 @@
         </a>
     </nav>
 
-    <!-- MAIN PROFILE -->
     <main class="main-profile">
         <div class="topbar">
             <button class="btn-back" onclick="history.back()"><i class="fa-solid fa-arrow-left"></i></button>
@@ -230,25 +247,25 @@
             </div>
 
             <div class="profile-name-row">
-                <div class="profile-name" id="profile-name">—</div>
-                <span id="verified-icon"></span>
+                <div class="profile-name">
+                    <span id="profile-name">—</span>
+                    <span id="verified-icon"></span>
+                </div>
                 <span id="badge-pill"></span>
             </div>
             <div class="profile-handle" id="profile-handle">@—</div>
             <div class="profile-bio" id="profile-bio"></div>
-            <div class="profile-meta">
-                <span><i class="fa-regular fa-calendar"></i> <span id="joined-date">—</span></span>
-            </div>
+            
             <div class="profile-stats">
-                <div class="pstat"><strong id="stat-following">0</strong><span>Seguiti</span></div>
-                <div class="pstat"><strong id="stat-followers">0</strong><span>Follower</span></div>
-                <div class="pstat"><strong id="stat-posts">0</strong><span>Post</span></div>
+                <div class="pstat" onclick="openFollowList('following')"><strong id="stat-following">0</strong><span>Seguiti</span></div>
+                <div class="pstat" onclick="openFollowList('followers')"><strong id="stat-followers">0</strong><span>Follower</span></div>
+                <div class="pstat" style="cursor:default;"><strong id="stat-posts">0</strong><span>Post</span></div>
             </div>
         </div>
 
         <div class="profile-tabs">
             <button class="profile-tab active" onclick="loadTab('posts',this)">Post</button>
-            <button class="profile-tab" onclick="loadTab('likes',this)">Mi piace</button>
+            <button class="profile-tab" onclick="loadTab('reposts',this)">Condivisi</button>
         </div>
 
         <div id="posts-container">
@@ -256,13 +273,32 @@
         </div>
     </main>
 
-    <!-- RIGHT SIDEBAR -->
     <aside class="sidebar-right">
         <div class="widget-r">
             <div class="widget-r-title">✨ Potrebbe piacerti</div>
-            <div id="suggested-list"><div style="color:var(--text-muted);font-size:.82rem;">Caricamento...</div></div>
+            <div id="suggested-list"><div style="color:var(--text-muted);font-size:.82rem;text-align:center;">Caricamento...</div></div>
         </div>
     </aside>
+</div>
+
+<div class="modal-overlay" id="verifiedModal">
+    <div class="generic-modal">
+        <div class="username-glyph"><i class="fa-solid fa-circle-check"></i></div>
+        <h2>Account Verificato</h2>
+        <p>Questa spunta indica che l'account è stato autenticato ufficialmente da AuraVerse, confermando l'identità dell'utente o la sua rilevanza all'interno della piattaforma.</p>
+        <button class="btn-claim" onclick="closeVerifiedModal()">Ho capito</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="listModal">
+    <div class="generic-modal list-modal-container">
+        <div class="modal-topbar">
+            <button class="btn-icon" onclick="closeListModal()"><i class="fa-solid fa-arrow-left"></i></button>
+            <span class="modal-topbar-title" id="list-modal-title">Utenti</span>
+        </div>
+        <div id="list-modal-content" style="overflow-y: auto; padding: 10px 0;">
+            </div>
+    </div>
 </div>
 
 <div class="toast" id="toast"><i id="toast-icon" class="fa-solid fa-check"></i><span id="toast-msg"></span></div>
@@ -276,7 +312,9 @@ const firebaseConfig = {
     messagingSenderId: "190478237725",
     appId: "1:190478237725:web:0d39907473f511b85a06f4"
 };
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const auth = firebase.auth();
 const db   = firebase.firestore();
 const FieldValue = firebase.firestore.FieldValue;
@@ -285,6 +323,9 @@ let me = null;
 let myData = {};
 let myUsername = null;
 let myFollowing = new Set();
+let likedPosts = new Set();
+let repostedPosts = new Set();
+
 let profileUID = null;
 let profileData = {};
 let profileUsername = null;
@@ -309,6 +350,10 @@ function fmtTime(date) {
     return d.toLocaleDateString('it-IT',{day:'numeric',month:'short'});
 }
 
+function vBadge(v) {
+    return v ? ` <i class="verified-icon fa-solid fa-circle-check" onclick="event.stopPropagation();showVerifiedModal()" title="Profilo Verificato"></i>` : '';
+}
+
 let toastTimer;
 function toast(msg, type='success') {
     const el = document.getElementById('toast');
@@ -331,6 +376,7 @@ auth.onAuthStateChanged(async user => {
         const nSnap = await db.collection('nicknames').where('uid','==',user.uid).limit(1).get();
         if (!nSnap.empty) myUsername = nSnap.docs[0].id;
         setupMySidebar();
+        
         // Load my following list
         const fSnap = await db.collection('users').doc(me.uid).collection('verse').get();
         fSnap.forEach(d => myFollowing.add(d.id));
@@ -341,7 +387,9 @@ auth.onAuthStateChanged(async user => {
 
 function setupMySidebar() {
     const name = `${myData.nome||''} ${myData.cognome||''}`.trim() || 'Utente Aura';
-    document.getElementById('sidebar-name').textContent = name;
+    const isV = myData.verified === true;
+    
+    document.getElementById('sidebar-name').innerHTML = esc(name) + vBadge(isV);
     document.getElementById('sidebar-handle').textContent = myUsername ? `@${myUsername}` : '—';
     document.getElementById('sidebar-avatar').src = myData.profileImage || 'images/default.png';
 }
@@ -353,13 +401,13 @@ async function resolveProfile() {
         if (!nSnap.exists) { showError('Utente @' + profileUsername + ' non trovato.'); return; }
         profileUID = nSnap.data().uid;
         isOwnProfile = profileUID === me?.uid;
-        const [uSnap, vSnap] = await Promise.all([
-            db.collection('users').doc(profileUID).get(),
-            db.collection('users').doc(profileUID).collection('verse').doc('verified').get()
-        ]);
+        
+        const uSnap = await db.collection('users').doc(profileUID).get();
         if (!uSnap.exists) { showError('Profilo non trovato.'); return; }
+        
         profileData = uSnap.data();
-        profileVerified = vSnap.exists && vSnap.data().verified === true;
+        profileVerified = profileData.verified === true;
+        
         await renderProfileHeader();
         loadTab('posts', document.querySelector('.profile-tab.active'));
     } catch(e) { showError('Errore: ' + e.message); }
@@ -373,36 +421,34 @@ async function renderProfileHeader() {
     const badge = d.badge || null;
 
     document.title = `@${profileUsername} | AuraVerse`;
-    document.getElementById('topbar-name-text').textContent = name;
-    document.getElementById('profile-name').textContent = name;
-    document.getElementById('profile-handle').textContent = `@${profileUsername}`;
-    document.getElementById('profile-bio').textContent = bio;
-    document.getElementById('profile-avatar').src = avatar;
-
-    // Verified icon
+    
     if (profileVerified) {
-        document.getElementById('verified-icon').innerHTML = '<i class="fa-solid fa-circle-check verified-badge" title="Account verificato"></i>';
-        document.getElementById('topbar-name-text').insertAdjacentHTML('afterend', ' <i class="fa-solid fa-circle-check verified-badge" style="font-size:15px;"></i>');
+        document.getElementById('verified-icon').innerHTML = vBadge(true);
+        document.getElementById('topbar-name-text').innerHTML = `${esc(name)}${vBadge(true)}`;
+    } else {
+        document.getElementById('verified-icon').innerHTML = '';
+        document.getElementById('topbar-name-text').textContent = name;
     }
 
-    // Badge pill
+    document.getElementById('profile-name').textContent = name;
+    document.getElementById('profile-handle').textContent = `@${profileUsername}`;
+    document.getElementById('profile-bio').innerHTML = fmtContent(bio);
+    document.getElementById('profile-avatar').src = avatar;
+
     if (badge) {
         document.getElementById('badge-pill').innerHTML = `<span class="badge-pill"><i class="fa-solid fa-star"></i> ${esc(badge)}</span>`;
     }
 
-    // Joined date
-    if (d.createdAt) {
-        const dt = d.createdAt.toDate ? d.createdAt.toDate() : new Date(d.createdAt);
-        document.getElementById('joined-date').textContent = 'Iscritto ' + dt.toLocaleDateString('it-IT',{month:'long',year:'numeric'});
+    // Following count
+    const followingSnap = await db.collection('users').doc(profileUID).collection('verse').where('type','==','follow').get();
+    let followingCount = followingSnap.size;
+    if(followingCount === 0) { // Fallback se ci sono dati legacy senza "type"
+        const oldSnap = await db.collection('users').doc(profileUID).collection('verse').get();
+        followingCount = oldSnap.docs.filter(d => d.id !== 'verified').length;
     }
+    document.getElementById('stat-following').textContent = followingCount;
 
-    // Following count (people this profile follows)
-    const followingSnap = await db.collection('users').doc(profileUID).collection('verse').get();
-    document.getElementById('stat-following').textContent = followingSnap.size;
-
-    // Followers count: count users whose 'verse' subcollection contains profileUID doc
-    // This requires a collection group query – simplified: count from a counter or skip
-    // We'll store a followerCount field updated on follow/unfollow
+    // Followers count
     document.getElementById('stat-followers').textContent = d.followerCount || 0;
 
     // Posts count
@@ -416,7 +462,6 @@ async function renderProfileHeader() {
     if (isOwnProfile) {
         actEl.innerHTML = `<button class="btn-edit-main" onclick="window.location.href='account.html'"><i class="fa-solid fa-pen"></i> Modifica profilo</button>`;
     } else {
-        // Check if we follow this person
         isFollowing = myFollowing.has(profileUID);
         actEl.innerHTML = `<button class="btn-follow-main ${isFollowing?'following':''}" id="btn-follow-main" onclick="toggleFollow()">${isFollowing ? 'Seguito ✓' : 'Segui'}</button>`;
     }
@@ -426,10 +471,11 @@ async function toggleFollow() {
     if (!me || isOwnProfile) return;
     const btn = document.getElementById('btn-follow-main');
     const ref = db.collection('users').doc(me.uid).collection('verse').doc(profileUID);
+    const followerRef = db.collection('users').doc(profileUID).collection('followers').doc(me.uid);
 
     if (isFollowing) {
         await ref.delete();
-        // Decrement target followerCount
+        await followerRef.delete();
         await db.collection('users').doc(profileUID).update({ followerCount: FieldValue.increment(-1) });
         isFollowing = false;
         myFollowing.delete(profileUID);
@@ -439,8 +485,8 @@ async function toggleFollow() {
         document.getElementById('stat-followers').textContent = Math.max(0, cur - 1);
         toast(`Non segui più @${profileUsername}`, 'success');
     } else {
-        await ref.set({ followedAt: FieldValue.serverTimestamp(), uid: profileUID });
-        // Increment target followerCount
+        await ref.set({ type: 'follow', target: profileUID, followedAt: FieldValue.serverTimestamp() });
+        await followerRef.set({ uid: me.uid, ts: FieldValue.serverTimestamp() });
         await db.collection('users').doc(profileUID).update({ followerCount: FieldValue.increment(1) });
         isFollowing = true;
         myFollowing.add(profileUID);
@@ -457,33 +503,50 @@ async function loadTab(tab, btn) {
     if (btn) btn.classList.add('active');
     const c = document.getElementById('posts-container');
     c.innerHTML = '<div class="feed-loading"><div class="spinner"></div><span>Caricamento...</span></div>';
+    
     try {
         let snap;
         if (tab === 'posts') {
             snap = await db.collection('verse').where('proprietario','==',profileUID).orderBy('timestamp','desc').limit(40).get();
-        } else {
-            // Likes: get likes subcolleciton docs where uid == profileUID via collectionGroup
-            snap = await db.collectionGroup('likes').where('uid','==',profileUID).limit(20).get();
+        } else if (tab === 'reposts') {
+            snap = await db.collectionGroup('reposts').where('uid','==',profileUID).limit(30).get();
             if (snap.empty) {
-                c.innerHTML = emptyState('fa-heart','Nessun mi piace', isOwnProfile ? 'Non hai ancora messo mi piace.' : `@${profileUsername} non ha ancora messo mi piace.`);
+                c.innerHTML = emptyState('fa-retweet', 'Nessun post condiviso', isOwnProfile ? 'Non hai ancora condiviso nulla.' : `@${profileUsername} non ha ancora condiviso nulla.`);
                 return;
             }
-            // Get the parent posts
             const postDocs = await Promise.all(snap.docs.map(d => d.ref.parent.parent.get()));
             c.innerHTML = '';
-            postDocs.forEach(doc => { if (doc.exists) c.appendChild(buildCard({id:doc.id,...doc.data()})); });
+            
+            const validPosts = postDocs.filter(doc => doc.exists);
+            await cacheMyInteractions(validPosts.map(d => d.id));
+            
+            validPosts.forEach(doc => c.appendChild(buildCard({id:doc.id,...doc.data()})));
             return;
         }
 
-        c.innerHTML = '';
         if (snap.empty) {
             c.innerHTML = emptyState('fa-feather-pointed','Nessun post', isOwnProfile ? 'Non hai ancora pubblicato nulla.' : `@${profileUsername} non ha ancora pubblicato nulla.`);
             return;
         }
+        
+        await cacheMyInteractions(snap.docs.map(d => d.id));
+        c.innerHTML = '';
         snap.forEach(doc => c.appendChild(buildCard({id:doc.id,...doc.data()})));
+        
     } catch(e) {
         c.innerHTML = emptyState('fa-circle-exclamation','Errore',e.message);
     }
+}
+
+/* Cache likes and reposts of the viewer */
+async function cacheMyInteractions(postIds) {
+    if (!me || postIds.length === 0) return;
+    await Promise.all(postIds.map(id => Promise.all([
+        db.collection('verse').doc(id).collection('likes').doc(me.uid).get()
+            .then(s => { if(s.exists) likedPosts.add(id); else likedPosts.delete(id); }).catch(()=>{}),
+        db.collection('verse').doc(id).collection('reposts').doc(me.uid).get()
+            .then(s => { if(s.exists) repostedPosts.add(id); else repostedPosts.delete(id); }).catch(()=>{})
+    ])));
 }
 
 function buildCard(data) {
@@ -494,38 +557,34 @@ function buildCard(data) {
     const handle = esc(data.username||'anonimo');
     const time = fmtTime(data.timestamp);
     const isOwn = data.proprietario === me?.uid;
+    const isLiked = likedPosts.has(data.id);
+    const isReposted = repostedPosts.has(data.id);
+    const v = vBadge(data.authorVerified);
 
     div.innerHTML = `
         <img class="post-avatar" src="${avatar}" onerror="this.src='images/default.png'" alt="">
         <div class="post-body">
             <div class="post-header">
-                <div class="post-name">${name} ${profileVerified && data.proprietario===profileUID ? '<i class="fa-solid fa-circle-check" style="color:var(--accent);font-size:12px;"></i>' : ''}</div>
+                <div class="post-name">${name}${v}</div>
                 <span class="post-handle">@${handle}</span>
                 <span class="post-time">${time}</span>
             </div>
             <div class="post-content">${fmtContent(data.contenuto||'')}</div>
             <div class="post-actions">
-                <button class="post-action" onclick="event.stopPropagation()"><i class="fa-regular fa-comment"></i> ${data.commentsCount||0}</button>
-                <button class="post-action" id="lk-${data.id}" onclick="event.stopPropagation();likePost('${data.id}',this)"><i class="fa-regular fa-heart"></i> <span id="lkc-${data.id}">${data.likesCount||0}</span></button>
+                <button class="post-action" onclick="event.stopPropagation()"><i class="fa-regular fa-comment"></i> <span>${data.commentsCount||0}</span></button>
+                <button class="post-action${isReposted?' reposted':''}" id="rep-${data.id}" onclick="event.stopPropagation();repostPost('${data.id}',this)">
+                    <i class="fa-solid fa-retweet"></i> <span id="repc-${data.id}">${data.repostsCount||0}</span>
+                </button>
+                <button class="post-action${isLiked?' liked':''}" id="lk-${data.id}" onclick="event.stopPropagation();likePost('${data.id}',this)">
+                    <i class="fa-${isLiked?'solid':'regular'} fa-heart"></i> <span id="lkc-${data.id}">${data.likesCount||0}</span>
+                </button>
                 <button class="post-action" onclick="event.stopPropagation();copyLink('${data.id}')"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
-                ${isOwn ? `<button class="post-action danger" onclick="event.stopPropagation();deletePost('${data.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+                ${isOwn ? `<button class="post-action danger" style="margin-left:auto;" onclick="event.stopPropagation();deletePost('${data.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
         </div>`;
 
-    checkLike(data.id);
     div.addEventListener('click', () => window.location.href = `dashboard.html?post=${data.id}`);
     return div;
-}
-
-async function checkLike(postId) {
-    if (!me) return;
-    try {
-        const snap = await db.collection('verse').doc(postId).collection('likes').doc(me.uid).get();
-        if (snap.exists) {
-            const btn = document.getElementById('lk-' + postId);
-            if (btn) { btn.classList.add('liked'); btn.querySelector('i').className = 'fa-solid fa-heart'; }
-        }
-    } catch(e) {}
 }
 
 async function likePost(postId, btn) {
@@ -535,23 +594,51 @@ async function likePost(postId, btn) {
     const countEl = document.getElementById('lkc-' + postId);
     const snap = await likeRef.get();
     let count = parseInt(countEl?.textContent)||0;
+    
     if (snap.exists) {
         await likeRef.delete();
         await postRef.update({ likesCount: FieldValue.increment(-1) });
         btn.classList.remove('liked');
         btn.querySelector('i').className = 'fa-regular fa-heart';
         if (countEl) countEl.textContent = Math.max(0,count-1);
+        likedPosts.delete(postId);
     } else {
         await likeRef.set({ uid: me.uid, ts: FieldValue.serverTimestamp() });
         await postRef.update({ likesCount: FieldValue.increment(1) });
         btn.classList.add('liked');
         btn.querySelector('i').className = 'fa-solid fa-heart';
         if (countEl) countEl.textContent = count+1;
+        likedPosts.add(postId);
+    }
+}
+
+async function repostPost(postId, btn) {
+    if (!me) return;
+    const repRef = db.collection('verse').doc(postId).collection('reposts').doc(me.uid);
+    const postRef = db.collection('verse').doc(postId);
+    const countEl = document.getElementById('repc-' + postId);
+    const snap = await repRef.get();
+    let count = parseInt(countEl?.textContent)||0;
+    
+    if(snap.exists){
+        await repRef.delete();
+        await postRef.update({repostsCount: FieldValue.increment(-1)});
+        btn.classList.remove('reposted');
+        if(countEl) countEl.textContent = Math.max(0, count-1);
+        repostedPosts.delete(postId);
+        toast('Condivisione revocata.','success');
+    }else{
+        await repRef.set({uid: me.uid, ts: FieldValue.serverTimestamp()});
+        await postRef.update({repostsCount: FieldValue.increment(1)});
+        btn.classList.add('reposted');
+        if(countEl) countEl.textContent = count+1;
+        repostedPosts.add(postId);
+        toast('Post condiviso! 🔄','success');
     }
 }
 
 async function deletePost(postId) {
-    if (!confirm('Eliminare questo post?')) return;
+    if (!confirm('Eliminare questo post definitivamente?')) return;
     await db.collection('verse').doc(postId).delete();
     toast('Post eliminato','success');
     loadTab('posts', document.querySelector('.profile-tab.active'));
@@ -571,27 +658,122 @@ function showError(msg) {
     document.getElementById('posts-container').innerHTML = emptyState('fa-circle-exclamation',msg,'');
 }
 
+/* Modals Logic */
+function showVerifiedModal() { document.getElementById('verifiedModal').classList.add('open'); }
+function closeVerifiedModal() { document.getElementById('verifiedModal').classList.remove('open'); }
+
+async function openFollowList(type) {
+    document.getElementById('list-modal-title').textContent = type === 'followers' ? 'Follower' : 'Seguiti';
+    const content = document.getElementById('list-modal-content');
+    content.innerHTML = '<div class="feed-loading" style="padding:40px 20px;"><div class="spinner"></div></div>';
+    document.getElementById('listModal').classList.add('open');
+
+    try {
+        let uids = [];
+        if (type === 'followers') {
+            const snap = await db.collection('users').doc(profileUID).collection('followers').get();
+            snap.forEach(d => uids.push(d.id));
+        } else {
+            const snap = await db.collection('users').doc(profileUID).collection('verse').where('type','==','follow').get();
+            if (snap.empty) {
+                // Fallback for older unstructured data
+                const oldSnap = await db.collection('users').doc(profileUID).collection('verse').get();
+                oldSnap.forEach(d => { if(d.id !== 'verified') uids.push(d.id) });
+            } else {
+                snap.forEach(d => uids.push(d.id));
+            }
+        }
+
+        if (uids.length === 0) {
+            content.innerHTML = `<div style="text-align:center; padding: 40px 20px; color: var(--text-muted);">Nessun utente trovato.</div>`;
+            return;
+        }
+
+        content.innerHTML = '';
+        const sliced = uids.slice(0, 50); // Mostriamo un massimo per evitare freeze client
+        
+        for (let uid of sliced) {
+            const uSnap = await db.collection('users').doc(uid).get();
+            if (!uSnap.exists) continue;
+            
+            const d = uSnap.data();
+            const nSnap = await db.collection('nicknames').where('uid','==',uid).limit(1).get();
+            const uname = nSnap.empty ? '' : nSnap.docs[0].id;
+            
+            if(!uname) continue;
+
+            const name = `${d.nome||''} ${d.cognome||''}`.trim() || 'Utente Aura';
+            const avatar = d.profileImage || 'images/default.png';
+            const isV = d.verified === true;
+
+            const item = document.createElement('div');
+            item.className = 'follow-item';
+            item.style.padding = '12px 20px';
+            item.style.cursor = 'pointer';
+            item.style.borderBottom = '1px solid var(--border)';
+            item.onclick = () => window.location.href = `profile.html?user=${uname}`;
+            item.innerHTML = `
+                <img src="${esc(avatar)}" onerror="this.src='images/default.png'">
+                <div class="follow-info">
+                    <div class="follow-name">${esc(name)}${vBadge(isV)}</div>
+                    <div class="follow-handle">@${esc(uname)}</div>
+                </div>
+            `;
+            content.appendChild(item);
+        }
+        
+        if(content.innerHTML === '') content.innerHTML = `<div style="text-align:center; padding: 40px 20px; color: var(--text-muted);">Nessun utente trovato.</div>`;
+
+    } catch (e) {
+        content.innerHTML = `<div style="text-align:center; padding: 40px 20px; color: var(--text-muted);">Errore nel caricamento.</div>`;
+    }
+}
+function closeListModal() { document.getElementById('listModal').classList.remove('open'); }
+
+/* Chiudi le modali cliccando fuori */
+document.getElementById('verifiedModal').addEventListener('click', e => { if(e.target === document.getElementById('verifiedModal')) closeVerifiedModal(); });
+document.getElementById('listModal').addEventListener('click', e => { if(e.target === document.getElementById('listModal')) closeListModal(); });
+
+
+/* SUGGESTED (Dinamici) */
 async function loadSuggested() {
     const list = document.getElementById('suggested-list');
     try {
-        const snap = await db.collection('users').limit(6).get();
+        const snap = await db.collection('users').limit(30).get();
+        let users = [];
+        
+        snap.forEach(doc => {
+            const d = doc.data();
+            if (doc.id !== me?.uid && doc.id !== profileUID && d.username && !myFollowing.has(doc.id)) {
+                users.push({ id: doc.id, ...d });
+            }
+        });
+
+        // Mescola e prendi al massimo 4 utenti
+        users.sort(() => 0.5 - Math.random());
+        users = users.slice(0, 4);
+
         list.innerHTML = '';
-        const users = [];
-        snap.forEach(doc => { if (doc.id !== me?.uid && doc.id !== profileUID) users.push({uid:doc.id,...doc.data()}); });
-        if (!users.length) { list.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem;text-align:center;padding:10px;">Nessun suggerimento</div>'; return; }
-        users.slice(0,4).forEach(u => {
+        if (!users.length) { 
+            list.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem;text-align:center;padding:10px;">Nessun suggerimento</div>'; 
+            return; 
+        }
+        
+        users.forEach(u => {
             const name = `${u.nome||''} ${u.cognome||''}`.trim() || 'Utente Aura';
-            const handle = u.username || u.uid.slice(0,8);
+            const handle = u.username;
             const avatar = u.profileImage || 'images/default.png';
+            const isV = u.verified === true;
+            
             const item = document.createElement('div');
             item.className = 'follow-item';
             item.innerHTML = `
-                <img src="${avatar}" onerror="this.src='images/default.png'">
+                <img src="${esc(avatar)}" onerror="this.src='images/default.png'">
                 <div class="follow-info">
-                    <div class="follow-name"><a href="profile.html?user=${esc(handle)}" style="color:var(--text);text-decoration:none;">${esc(name)}</a></div>
+                    <div class="follow-name"><a href="profile.html?user=${esc(handle)}" style="color:var(--text);text-decoration:none;">${esc(name)}${vBadge(isV)}</a></div>
                     <div class="follow-handle">@${esc(handle)}</div>
                 </div>
-                <button class="btn-follow ${myFollowing.has(u.uid)?'following':''}" onclick="followFromSidebar('${u.uid}','${esc(handle)}',this)">${myFollowing.has(u.uid)?'Seguito ✓':'Segui'}</button>`;
+                <button class="btn-follow" onclick="followFromSidebar('${u.id}','${esc(handle)}',this)">Segui</button>`;
             list.appendChild(item);
         });
     } catch(e) {}
@@ -600,15 +782,19 @@ async function loadSuggested() {
 async function followFromSidebar(uid, handle, btn) {
     if (!me) return;
     const ref = db.collection('users').doc(me.uid).collection('verse').doc(uid);
+    const followerRef = db.collection('users').doc(uid).collection('followers').doc(me.uid);
+    
     if (myFollowing.has(uid)) {
         await ref.delete();
+        await followerRef.delete();
         await db.collection('users').doc(uid).update({ followerCount: FieldValue.increment(-1) });
         myFollowing.delete(uid);
         btn.textContent = 'Segui';
         btn.classList.remove('following');
         toast(`Non segui più @${handle}`,'success');
     } else {
-        await ref.set({ followedAt: FieldValue.serverTimestamp(), uid });
+        await ref.set({ type: 'follow', target: uid, followedAt: FieldValue.serverTimestamp() });
+        await followerRef.set({ uid: me.uid, ts: FieldValue.serverTimestamp() });
         await db.collection('users').doc(uid).update({ followerCount: FieldValue.increment(1) });
         myFollowing.add(uid);
         btn.textContent = 'Seguito ✓';
