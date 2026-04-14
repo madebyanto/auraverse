@@ -24,7 +24,6 @@
             --gradient: linear-gradient(135deg, #F05BFF, #7000FF);
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-            /* Light */
             --bg: #f2f2f7;
             --surface: #ffffff;
             --surface-2: rgba(0,0,0,0.03);
@@ -61,7 +60,6 @@
             line-height: 1.6;
         }
 
-        /* ─── Layout ─── */
         .container { display: flex; min-height: 100vh; }
 
         /* ─── Sidebar ─── */
@@ -91,11 +89,7 @@
         .sidebar-logo img { width: 30px; height: 30px; border-radius: 8px; }
         .sidebar-logo-name { font-weight: 800; font-size: 1rem; color: var(--text); }
 
-        .sidebar-divider {
-            border: none;
-            border-top: 1px solid var(--border);
-            margin: 12px 0;
-        }
+        .sidebar-divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 
         .sidebar-section-label {
             font-size: 0.68rem;
@@ -226,7 +220,14 @@
             font-size: 1.3rem;
             font-weight: 800;
             letter-spacing: -0.01em;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
+        }
+        /* FIX: aggiunto stile per username sotto il nome */
+        .profile-info-username {
+            font-size: 0.82rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 6px;
         }
         .profile-info-email { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; }
 
@@ -277,10 +278,7 @@
             color: var(--accent);
             flex-shrink: 0;
         }
-        .widget-title {
-            font-size: 1rem;
-            font-weight: 700;
-        }
+        .widget-title { font-size: 1rem; font-weight: 700; }
 
         /* UID box */
         .uid-box {
@@ -328,10 +326,7 @@
             color: var(--text-muted);
             margin-bottom: 4px;
         }
-        .info-item span, .info-item p {
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
+        .info-item span, .info-item p { font-size: 0.9rem; font-weight: 500; }
         .info-item.full { grid-column: span 2; }
 
         /* ─── Forms ─── */
@@ -363,7 +358,6 @@
             box-shadow: 0 0 0 3px var(--accent-soft);
         }
         textarea { resize: vertical; min-height: 80px; }
-
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
         /* ─── Buttons ─── */
@@ -385,6 +379,7 @@
             margin-top: 6px;
         }
         .btn-save:hover { transform: translateY(-2px); box-shadow: 0 10px 28px var(--accent-glow); }
+        .btn-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
         .btn-action {
             display: inline-flex;
@@ -435,15 +430,21 @@
             min-height: 40px;
         }
 
+        /* Username hint */
+        .username-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .username-hint.taken { color: #ff6b6b; }
+        .username-hint.available { color: #30d158; }
+
         /* Danger widget */
-        .widget-danger {
-            border-color: rgba(255,107,107,0.2);
-            cursor: pointer;
-        }
-        .widget-danger:hover {
-            border-color: rgba(255,107,107,0.5);
-            background: rgba(255,107,107,0.04);
-        }
+        .widget-danger { border-color: rgba(255,107,107,0.2); cursor: pointer; }
+        .widget-danger:hover { border-color: rgba(255,107,107,0.5); background: rgba(255,107,107,0.04); }
         .widget-danger .widget-icon { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.2); color: #ff6b6b; }
         .widget-danger .widget-title { color: #ff6b6b; }
         .widget-danger p { color: var(--text-muted); font-size: 0.875rem; font-weight: 300; }
@@ -491,10 +492,7 @@
             pointer-events: none;
             transition: opacity 0.3s ease;
         }
-        .modal-overlay.open {
-            opacity: 1;
-            pointer-events: all;
-        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
 
         .modal {
             background: var(--surface);
@@ -508,16 +506,9 @@
             transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
             position: relative;
         }
-        .modal-overlay.open .modal {
-            transform: translateY(0) scale(1);
-        }
+        .modal-overlay.open .modal { transform: translateY(0) scale(1); }
 
-        /* Step indicator */
-        .modal-steps {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 28px;
-        }
+        .modal-steps { display: flex; gap: 6px; margin-bottom: 28px; }
         .modal-step-dot {
             height: 4px;
             border-radius: 2px;
@@ -526,14 +517,8 @@
             border: 1px solid var(--border);
             transition: var(--transition);
         }
-        .modal-step-dot.active {
-            background: #ff6b6b;
-            border-color: rgba(255,107,107,0.4);
-        }
-        .modal-step-dot.done {
-            background: rgba(255,107,107,0.3);
-            border-color: rgba(255,107,107,0.2);
-        }
+        .modal-step-dot.active { background: #ff6b6b; border-color: rgba(255,107,107,0.4); }
+        .modal-step-dot.done { background: rgba(255,107,107,0.3); border-color: rgba(255,107,107,0.2); }
 
         .modal-icon {
             width: 56px; height: 56px;
@@ -561,13 +546,7 @@
             margin-bottom: 20px;
         }
 
-        /* Consequences list */
-        .consequence-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 24px;
-        }
+        .consequence-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
         .consequence-item {
             display: flex;
             align-items: flex-start;
@@ -580,18 +559,9 @@
             color: var(--text-muted);
             font-weight: 400;
         }
-        .consequence-item i {
-            color: #ff6b6b;
-            margin-top: 2px;
-            flex-shrink: 0;
-            font-size: 12px;
-        }
+        .consequence-item i { color: #ff6b6b; margin-top: 2px; flex-shrink: 0; font-size: 12px; }
 
-        /* Password input in modal */
-        .modal-input-wrap {
-            position: relative;
-            margin-bottom: 20px;
-        }
+        .modal-input-wrap { position: relative; margin-bottom: 20px; }
         .modal-input-wrap label {
             display: block;
             font-size: 0.72rem;
@@ -601,20 +571,14 @@
             color: var(--text-muted);
             margin-bottom: 8px;
         }
-        .modal-input-wrap input[type="password"] {
-            border-color: rgba(255,107,107,0.2);
-        }
+        .modal-input-wrap input[type="password"] { border-color: rgba(255,107,107,0.2); }
         .modal-input-wrap input[type="password"]:focus {
             border-color: rgba(255,107,107,0.5);
             background: rgba(255,107,107,0.05);
             box-shadow: 0 0 0 3px rgba(255,107,107,0.08);
         }
 
-        /* Modal buttons */
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-        }
+        .modal-actions { display: flex; gap: 10px; }
         .btn-modal-cancel {
             flex: 1;
             padding: 12px;
@@ -649,17 +613,9 @@
             gap: 8px;
         }
         .btn-modal-delete:hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(255,107,107,0.35); }
-        .btn-modal-delete:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .btn-modal-delete:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        /* Goodbye screen */
-        .goodbye-screen {
-            text-align: center;
-            padding: 12px 0;
-        }
+        .goodbye-screen { text-align: center; padding: 12px 0; }
         .goodbye-screen .goodbye-emoji {
             font-size: 3rem;
             margin-bottom: 16px;
@@ -674,14 +630,8 @@
             80%  { transform: rotate(5deg); }
             100% { transform: rotate(0deg); }
         }
-        .goodbye-screen h2 {
-            font-size: 1.4rem;
-            margin-bottom: 10px;
-        }
-        .goodbye-screen p {
-            font-size: 0.875rem;
-            margin-bottom: 0;
-        }
+        .goodbye-screen h2 { font-size: 1.4rem; margin-bottom: 10px; }
+        .goodbye-screen p { font-size: 0.875rem; margin-bottom: 0; }
 
         /* ─── Responsive ─── */
         @media (max-width: 850px) {
@@ -715,10 +665,10 @@
 
     <!-- Sidebar -->
     <nav class="sidebar">
-        <a href="dashboard.html" class="logo-wrap" style="font-family: 'Poppins', sans-serif;">
-    <img src="/auraverse.jpg" alt="Aura">
-    <span class="logo-name">Aura<span>Verse</span></span>
-</a>
+        <a href="dashboard.html" class="sidebar-logo">
+            <img src="images/aura-nobg.png" alt="Aura">
+            <span class="sidebar-logo-name">Aura</span>
+        </a>
 
         <hr class="sidebar-divider">
         <div class="sidebar-section-label">Account</div>
@@ -761,6 +711,8 @@
                 </div>
                 <div class="profile-info">
                     <div class="profile-info-name" id="overview-name">Caricamento...</div>
+                    <!-- FIX: aggiunto username in Panoramica -->
+                    <div class="profile-info-username" id="overview-username-display"></div>
                     <div class="profile-info-email" id="overview-email">—</div>
                     <div class="profile-badges">
                         <span class="badge-pill"><i class="fa-solid fa-star"></i> <span id="overview-badge">Membro</span></span>
@@ -778,6 +730,11 @@
                     <div class="info-item">
                         <label>Nome completo</label>
                         <span id="overview-name-detail">—</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Username</label>
+                        <!-- FIX: aggiunto campo username nei dettagli -->
+                        <span id="overview-username-detail">—</span>
                     </div>
                     <div class="info-item">
                         <label>Email</label>
@@ -818,12 +775,17 @@
                         <label>Cognome</label>
                         <input type="text" id="edit-cognome" placeholder="Il tuo cognome">
                     </div>
-                    <div class="form-group">
-                        <label>Nickname</label>
-                        <input type="text" id="edit-nickname" placeholder="Il tuo nickname">
+                </div>
+                <!-- FIX: username separato con validazione dedicata -->
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="edit-username" placeholder="Il tuo username" autocomplete="off">
+                    <div class="username-hint" id="username-hint">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>Solo lettere, numeri e underscore. Min 3 caratteri.</span>
                     </div>
                 </div>
-                <button class="btn-save" onclick="saveProfile()">
+                <button class="btn-save" id="btn-save-profile" onclick="saveProfile()">
                     <i class="fa-solid fa-floppy-disk"></i> Salva modifiche
                 </button>
             </div>
@@ -838,7 +800,7 @@
                     <textarea id="edit-description" placeholder="Scrivi qualcosa su di te..."></textarea>
                 </div>
                 <div class="bio-preview" id="description-preview">Nessuna anteprima</div>
-                <button class="btn-save" onclick="saveProfile()">
+                <button class="btn-save" onclick="saveBio()">
                     <i class="fa-solid fa-floppy-disk"></i> Salva bio
                 </button>
             </div>
@@ -856,7 +818,7 @@
                     <img id="profile-preview" src="images/default.png" alt="Anteprima">
                     <p>L'anteprima si aggiorna automaticamente mentre scrivi.</p>
                 </div>
-                <button class="btn-save" onclick="saveProfile()">
+                <button class="btn-save" onclick="saveImage()">
                     <i class="fa-solid fa-floppy-disk"></i> Salva immagine
                 </button>
             </div>
@@ -922,14 +884,13 @@
 <!-- ─── Delete Account Modal ─── -->
 <div class="modal-overlay" id="deleteModal">
     <div class="modal">
-        <!-- Step dots -->
         <div class="modal-steps">
             <div class="modal-step-dot active" id="step-dot-1"></div>
             <div class="modal-step-dot" id="step-dot-2"></div>
             <div class="modal-step-dot" id="step-dot-3"></div>
         </div>
 
-        <!-- Step 1: Conseguenze -->
+        <!-- Step 1 -->
         <div id="modal-step-1">
             <div class="modal-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
             <h2>Eliminare l'account?</h2>
@@ -960,7 +921,7 @@
             </div>
         </div>
 
-        <!-- Step 2: Conferma password -->
+        <!-- Step 2 -->
         <div id="modal-step-2" style="display:none;">
             <div class="modal-icon"><i class="fa-solid fa-lock"></i></div>
             <h2>Conferma la tua identità</h2>
@@ -979,7 +940,7 @@
             </div>
         </div>
 
-        <!-- Step 3: Ultima conferma -->
+        <!-- Step 3 -->
         <div id="modal-step-3" style="display:none;">
             <div class="modal-icon"><i class="fa-solid fa-skull"></i></div>
             <h2>Sei assolutamente sicuro?</h2>
@@ -1016,7 +977,12 @@
     const auth = firebase.auth();
     const db   = firebase.firestore();
 
-    // ── Toast ──
+    // ─── Stato globale ───
+    let currentUID = '';
+    let currentUsername = ''; // username attuale salvato nel DB
+    let usernameCheckTimer = null;
+
+    // ─── Toast ───
     let toastTimer;
     function showToast(msg, type = 'success') {
         const toast = document.getElementById('toast');
@@ -1029,7 +995,7 @@
         toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // ── Nav ──
+    // ─── Nav ───
     const sectionTitles = {
         panoramica: 'Panoramica',
         personalizzazione: 'Profilo',
@@ -1048,69 +1014,204 @@
         });
     });
 
-    // ── Auth ──
-    let currentUID = '';
-
+    // ─── Auth ───
     auth.onAuthStateChanged(async user => {
         if (!user) { window.location.href = 'index.html'; return; }
         currentUID = user.uid;
         try {
             const doc = await db.collection('users').doc(user.uid).get();
             if (doc.exists) updateUI(doc.data(), user);
-        } catch(err) { console.error('Errore:', err); }
+        } catch(err) {
+            console.error('Errore caricamento dati:', err);
+        }
     });
 
     function updateUI(data, user) {
         const nomeCompleto = `${data.nome || ''} ${data.cognome || ''}`.trim() || 'Utente Aura';
-        const bio = data.bio?.description || '';
-        const saldo = (data.saldo || 0).toLocaleString('it-IT', { style:'currency', currency:'EUR' });
+        const bio          = data.bio?.description || '';
+        const username     = data.username || '';
+        const saldo        = (data.saldo || 0).toLocaleString('it-IT', { style:'currency', currency:'EUR' });
 
-        // Panoramica
-        document.getElementById('overview-name').textContent        = nomeCompleto;
-        document.getElementById('overview-name-detail').textContent = nomeCompleto;
-        document.getElementById('overview-email').textContent       = user.email;
-        document.getElementById('overview-email-detail').textContent= user.email;
-        document.getElementById('overview-img').src                 = data.profileImage || 'images/default.png';
-        document.getElementById('overview-saldo').textContent       = saldo;
-        document.getElementById('overview-badge').textContent       = data.badge || 'Membro';
-        document.getElementById('overview-description').textContent = bio || 'Nessuna descrizione.';
-        document.getElementById('overview-uid').textContent         = user.uid;
+        // Salva username corrente in memoria
+        currentUsername = username;
+
+        // Panoramica — card
+        document.getElementById('overview-name').textContent            = nomeCompleto;
+        document.getElementById('overview-email').textContent           = user.email;
+        document.getElementById('overview-img').src                     = data.profileImage || 'images/default.png';
+        document.getElementById('overview-saldo').textContent           = saldo;
+        document.getElementById('overview-badge').textContent           = data.badge || 'Membro';
+        // FIX: username nella card panoramica
+        const usernameDisplay = document.getElementById('overview-username-display');
+        usernameDisplay.textContent = username ? `@${username}` : '';
+
+        // Panoramica — widget dettagli
+        document.getElementById('overview-name-detail').textContent     = nomeCompleto;
+        document.getElementById('overview-email-detail').textContent    = user.email;
+        document.getElementById('overview-username-detail').textContent = username ? `@${username}` : '—';
+        document.getElementById('overview-description').textContent     = bio || 'Nessuna descrizione.';
+        document.getElementById('overview-uid').textContent             = user.uid;
 
         // Form
         document.getElementById('edit-nome').value          = data.nome || '';
         document.getElementById('edit-cognome').value       = data.cognome || '';
-        document.getElementById('edit-nickname').value       = data.nickname || '';
+        document.getElementById('edit-username').value      = username;
         document.getElementById('edit-profileImage').value  = data.profileImage || '';
         document.getElementById('profile-preview').src      = data.profileImage || 'images/default.png';
         document.getElementById('edit-description').value   = bio;
         document.getElementById('description-preview').textContent = bio || 'Nessuna anteprima';
     }
 
-    // ── Save ──
+    // ─── Validazione username live ───
+    function isValidUsername(u) {
+        return /^[a-zA-Z0-9_]{3,20}$/.test(u);
+    }
+
+    document.getElementById('edit-username').addEventListener('input', () => {
+        const val  = document.getElementById('edit-username').value.trim();
+        const hint = document.getElementById('username-hint');
+
+        clearTimeout(usernameCheckTimer);
+        hint.className = 'username-hint';
+        hint.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Controllo...</span>';
+
+        if (!val) {
+            hint.innerHTML = '<i class="fa-solid fa-circle-info"></i> <span>Solo lettere, numeri e underscore. Min 3 caratteri.</span>';
+            return;
+        }
+        if (!isValidUsername(val)) {
+            hint.className = 'username-hint taken';
+            hint.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> <span>Username non valido (3-20 caratteri, solo lettere/numeri/_).</span>';
+            return;
+        }
+        // Se è lo stesso di prima, ok senza check DB
+        if (val === currentUsername) {
+            hint.className = 'username-hint available';
+            hint.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Username attuale.</span>';
+            return;
+        }
+
+        usernameCheckTimer = setTimeout(async () => {
+            try {
+                const snap = await db.collection('nicknames').doc(val).get();
+                if (snap.exists) {
+                    hint.className = 'username-hint taken';
+                    hint.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> <span>Username già in uso.</span>';
+                } else {
+                    hint.className = 'username-hint available';
+                    hint.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Username disponibile!</span>';
+                }
+            } catch(err) {
+                hint.innerHTML = '<i class="fa-solid fa-circle-info"></i> <span>Impossibile verificare la disponibilità.</span>';
+            }
+        }, 600);
+    });
+
+    // ─── Salva profilo (nome, cognome, username) ───
     async function saveProfile() {
-        const user = auth.currentUser;
-        const updates = {
-            nome:           document.getElementById('edit-nome').value.trim(),
-            cognome:        document.getElementById('edit-cognome').value.trim(),
-            nickname:       document.getElementById('edit-nickname').value.trim(),
-            profileImage:   document.getElementById('edit-profileImage').value.trim(),
-            'bio.description': document.getElementById('edit-description').value.trim()
-        };
+        const user     = auth.currentUser;
+        const nome     = document.getElementById('edit-nome').value.trim();
+        const cognome  = document.getElementById('edit-cognome').value.trim();
+        const newUsername = document.getElementById('edit-username').value.trim();
+        const hint     = document.getElementById('username-hint');
+        const btn      = document.getElementById('btn-save-profile');
+
+        // Validazione username
+        if (newUsername && !isValidUsername(newUsername)) {
+            showToast('Username non valido.', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvataggio...';
+
         try {
-            await db.collection('users').doc(user.uid).update(updates);
-            showToast('Profilo aggiornato con successo!', 'success');
+            const batch = db.batch();
+
+            // Aggiorna users/{UID}
+            const userRef = db.collection('users').doc(user.uid);
+            batch.update(userRef, {
+                nome:     nome,
+                cognome:  cognome,
+                username: newUsername
+            });
+
+            // Gestione /nicknames
+            if (newUsername !== currentUsername) {
+                // Controlla disponibilità username
+                if (newUsername) {
+                    const snap = await db.collection('nicknames').doc(newUsername).get();
+                    if (snap.exists && snap.data().uid !== user.uid) {
+                        showToast('Username già in uso. Scegline un altro.', 'error');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salva modifiche';
+                        return;
+                    }
+                    // Crea nuovo nickname
+                    const newNicknameRef = db.collection('nicknames').doc(newUsername);
+                    batch.set(newNicknameRef, { uid: user.uid });
+                }
+
+                // Elimina vecchio nickname se esisteva
+                if (currentUsername) {
+                    const oldNicknameRef = db.collection('nicknames').doc(currentUsername);
+                    batch.delete(oldNicknameRef);
+                }
+            }
+
+            await batch.commit();
+
+            // Aggiorna stato locale
+            currentUsername = newUsername;
+
             // Aggiorna panoramica live
-            document.getElementById('overview-name').textContent = `${updates.nome} ${updates.cognome}`.trim();
-            document.getElementById('overview-name-detail').textContent = `${updates.nome} ${updates.cognome}`.trim();
-            document.getElementById('overview-nickname').textContent = updates.nickname || 'Nessun nickname';
-            document.getElementById('overview-img').src = updates.profileImage || 'images/default.png';
-            document.getElementById('overview-description').textContent = updates['bio.description'] || 'Nessuna descrizione.';
+            const nomeCompleto = `${nome} ${cognome}`.trim() || 'Utente Aura';
+            document.getElementById('overview-name').textContent            = nomeCompleto;
+            document.getElementById('overview-name-detail').textContent     = nomeCompleto;
+            document.getElementById('overview-username-detail').textContent = newUsername ? `@${newUsername}` : '—';
+            document.getElementById('overview-username-display').textContent = newUsername ? `@${newUsername}` : '';
+
+            // Aggiorna hint username
+            hint.className = 'username-hint available';
+            hint.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Username salvato.</span>';
+
+            showToast('Profilo aggiornato con successo!', 'success');
+        } catch(err) {
+            console.error(err);
+            showToast('Errore: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salva modifiche';
+        }
+    }
+
+    // ─── Salva bio (separato) ───
+    async function saveBio() {
+        const user = auth.currentUser;
+        const bio  = document.getElementById('edit-description').value.trim();
+        try {
+            await db.collection('users').doc(user.uid).update({ 'bio.description': bio });
+            document.getElementById('overview-description').textContent = bio || 'Nessuna descrizione.';
+            showToast('Bio aggiornata!', 'success');
         } catch(err) {
             showToast('Errore: ' + err.message, 'error');
         }
     }
 
-    // ── Reset password ──
+    // ─── Salva immagine (separato) ───
+    async function saveImage() {
+        const user = auth.currentUser;
+        const img  = document.getElementById('edit-profileImage').value.trim();
+        try {
+            await db.collection('users').doc(user.uid).update({ profileImage: img });
+            document.getElementById('overview-img').src = img || 'images/default.png';
+            showToast('Immagine profilo aggiornata!', 'success');
+        } catch(err) {
+            showToast('Errore: ' + err.message, 'error');
+        }
+    }
+
+    // ─── Reset password ───
     async function resetPassword() {
         const user = auth.currentUser;
         try {
@@ -1121,21 +1222,21 @@
         }
     }
 
-    // ── Logout ──
+    // ─── Logout ───
     function logoutButton() {
         if (confirm('Sei sicuro di voler uscire?')) {
             auth.signOut().then(() => window.location.href = 'index.html');
         }
     }
 
-    // ── Copy UID ──
+    // ─── Copy UID ───
     function copyUID() {
         navigator.clipboard.writeText(currentUID).then(() => {
             showToast('UID copiato negli appunti', 'success');
         });
     }
 
-    // ── Live previews ──
+    // ─── Live previews ───
     document.getElementById('edit-profileImage').addEventListener('input', e => {
         document.getElementById('profile-preview').src = e.target.value || 'images/default.png';
     });
@@ -1143,7 +1244,7 @@
         document.getElementById('description-preview').textContent = e.target.value || 'Nessuna anteprima';
     });
 
-    // ── Delete Account Modal ──
+    // ─── Delete Account Modal ───
     function openDeleteModal() {
         goToStep(1);
         document.getElementById('deleteModal').classList.add('open');
@@ -1154,7 +1255,6 @@
         document.getElementById('deleteModal').classList.remove('open');
     }
 
-    // Chiudi cliccando fuori
     document.getElementById('deleteModal').addEventListener('click', function(e) {
         if (e.target === this) closeDeleteModal();
     });
@@ -1163,29 +1263,24 @@
         [1, 2, 3, 4].forEach(n => {
             document.getElementById(`modal-step-${n}`).style.display = n === step ? 'block' : 'none';
         });
-        // Aggiorna step dots
         [1, 2, 3].forEach(n => {
             const dot = document.getElementById(`step-dot-${n}`);
             dot.classList.remove('active', 'done');
             if (n < step) dot.classList.add('done');
             else if (n === step) dot.classList.add('active');
         });
-        // Nasconde i dots allo step 4 (goodbye)
         document.querySelector('.modal-steps').style.display = step === 4 ? 'none' : 'flex';
     }
 
     async function verifyPasswordAndContinue() {
-        const user = auth.currentUser;
+        const user     = auth.currentUser;
         const password = document.getElementById('delete-password').value;
-        if (!password) {
-            showToast('Inserisci la password', 'error');
-            return;
-        }
+        if (!password) { showToast('Inserisci la password', 'error'); return; }
+
         const btn = document.getElementById('btn-verify-password');
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifica...';
         try {
-            // Re-authenticate
             const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
             await user.reauthenticateWithCredential(credential);
             goToStep(3);
@@ -1203,17 +1298,26 @@
 
     async function deleteAccountForever() {
         const user = auth.currentUser;
-        const btn = document.getElementById('btn-final-delete');
+        const btn  = document.getElementById('btn-final-delete');
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Eliminazione...';
         try {
-            // 1. Elimina documento Firestore
-            await db.collection('users').doc(user.uid).delete();
-            // 2. Elimina account Auth
+            const batch = db.batch();
+
+            // Elimina documento utente
+            batch.delete(db.collection('users').doc(user.uid));
+
+            // FIX: elimina anche il nickname da /nicknames al momento dell'eliminazione account
+            if (currentUsername) {
+                batch.delete(db.collection('nicknames').doc(currentUsername));
+            }
+
+            await batch.commit();
+
+            // Elimina account Auth
             await user.delete();
-            // 3. Mostra goodbye
+
             goToStep(4);
-            // 4. Redirect dopo 4 secondi
             setTimeout(() => { window.location.href = 'index.html'; }, 4000);
         } catch(err) {
             showToast('Errore durante l\'eliminazione: ' + err.message, 'error');
