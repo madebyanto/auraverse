@@ -225,10 +225,10 @@
 <div class="app-layout">
 
     <nav class="sidebar-left">
-        <a href="dashboard.html" class="logo-wrap" style="font-family: 'Poppins'">
-    <img src="/auraverse.jpg" alt="Aura">
-    <span class="logo-name">Aura<span>Verse</span></span>
-</a>
+        <a href="dashboard.html" class="logo-wrap">
+            <img src="media/auraverse-new.png" alt="Aura">
+            <span class="logo-name">Aura<span>Verse</span></span>
+        </a>
         <button class="btn-compose" onclick="scrollToCompose()">
             <i class="fa-solid fa-feather-pointed"></i><span>Pubblica</span>
         </button>
@@ -239,6 +239,7 @@
             <button class="nav-link" id="nav-profile" onclick="goToMyProfile()"><i class="fa-solid fa-user"></i><span>Profilo</span></button>
             <hr class="sidebar-divider" style="width:100%">
             <a class="nav-link" href="account.html"><i class="fa-solid fa-gear"></i><span>Impostazioni</span></a>
+            <button class="nav-link" onclick="openAltroModal()"><i class="fa-solid fa-ellipsis"></i><span>Altro</span></button>
         </div>
         <a class="sidebar-user" href="#" onclick="goToMyProfile();return false;">
             <img id="sidebar-avatar" src="images/default.png" alt="">
@@ -351,6 +352,28 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="altroModal">
+    <div class="generic-modal" style="max-width: 320px; padding: 24px;">
+        <div class="username-glyph" style="font-size: 2rem; margin-bottom: 10px;"><i class="fa-solid fa-circle-plus"></i></div>
+        <h2 style="margin-bottom: 20px;">Altro</h2>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <a href="https://aurastudioitalia.it/extras/rules.html" target="_blank" class="nav-link" style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; justify-content: flex-start;">
+                <i class="fa-solid fa-gavel"></i> <span>Regole</span>
+            </a>
+            <a href="changelog.html" class="nav-link" style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; justify-content: flex-start;">
+                <i class="fa-solid fa-list-ul"></i> <span>Changelog</span>
+            </a>
+            <a href="https://privacy.aurastudioitalia.it/privacypolicy.html" target="_blank" class="nav-link" style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; justify-content: flex-start;">
+                <i class="fa-solid fa-shield-halved"></i> <span>Privacy Policy</span>
+            </a>
+            <a href="https://privacy.aurastudioitalia.it/tos.html" class="nav-link" style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; justify-content: flex-start;">
+                <i class="fa-solid fa-file-contract"></i> <span>Termini di Servizio</span>
+            </a>
+        </div>
+        <button class="btn-claim" onclick="closeAltroModal()" style="margin-top: 20px; background: var(--surface-2); color: var(--text); box-shadow: none;">Chiudi</button>
+    </div>
+</div>
+
 <div class="modal-overlay" id="verifiedModal">
     <div class="generic-modal">
         <div class="username-glyph" style="font-size:3.5rem; color:var(--accent);"><i class="fa-solid fa-circle-check"></i></div>
@@ -375,6 +398,22 @@ let ME=null, myData={}, myUsername=null, myVerified=false;
 let currentTab='forYou', activePostId=null;
 let likedPosts=new Set(), repostedPosts=new Set(), followingUIDs=new Set();
 let unTimer=null, unValid=false, searchTimer=null;
+
+/* USER CACHE & SYNC */
+const userCache = new Map();
+async function fetchUser(uid) {
+    if (!uid) return null;
+    if (userCache.has(uid)) return userCache.get(uid);
+    try {
+        const snap = await db.collection('users').doc(uid).get();
+        if (snap.exists) {
+            const d = snap.data();
+            userCache.set(uid, d);
+            return d;
+        }
+    } catch(e) {}
+    return null;
+}
 
 /* TOAST */
 let toastTimer;
@@ -534,11 +573,11 @@ function buildCard(data,delay=0){
     const isOwn=data.proprietario===ME?.uid;
     const v=vBadge(data.authorVerified);
     card.innerHTML=`
-        <img class="post-avatar" src="${esc(avatar)}" onerror="this.src='images/default.png'" alt="">
+        <img class="post-avatar sync-pfp-${data.proprietario}" src="${esc(avatar)}" onerror="this.src='images/default.png'" alt="" onclick="event.stopPropagation(); window.location.href='profile.html?user=${esc(handle)}'">
         <div class="post-body">
             <div class="post-header">
-                <a class="post-author-name" href="profile.html?user=${esc(handle)}" onclick="event.stopPropagation()">${esc(name)}${v}</a>
-                <span class="post-handle">@${esc(handle)}</span>
+                <a class="post-author-name sync-name-${data.proprietario}" href="profile.html?user=${esc(handle)}" onclick="event.stopPropagation()">${esc(name)}${v}</a>
+                <span class="post-handle sync-handle-${data.proprietario}">@${esc(handle)}</span>
                 <span class="post-dot">·</span>
                 <span class="post-time">${time}</span>
                 <div class="post-menu-wrap">
@@ -562,6 +601,23 @@ function buildCard(data,delay=0){
             </div>
         </div>`;
     card.addEventListener('click',()=>openPost(data.id));
+    
+    // Sync user data dynamically
+    fetchUser(data.proprietario).then(u => {
+        if(u) {
+            const name = `${u.nome||''} ${u.cognome||''}`.trim() || 'Utente';
+            const handle = u.username || '';
+            const pfp = u.profileImage || 'images/default.png';
+            const isV = u.verified === true;
+            
+            card.querySelectorAll(`.sync-pfp-${data.proprietario}`).forEach(img => img.src = pfp);
+            card.querySelectorAll(`.sync-name-${data.proprietario}`).forEach(el => el.innerHTML = esc(name) + vBadge(isV));
+            card.querySelectorAll(`.sync-handle-${data.proprietario}`).forEach(el => el.textContent = '@' + handle);
+            card.querySelector('.post-author-name').href = `profile.html?user=${handle}`;
+            card.querySelector('.post-avatar').onclick = (e) => { e.stopPropagation(); window.location.href = `profile.html?user=${handle}`; };
+        }
+    });
+
     return card;
 }
 
@@ -570,16 +626,23 @@ async function likePost(postId,btn){
     if(!ME)return;
     const likeRef=db.collection('verse').doc(postId).collection('likes').doc(ME.uid);
     const postRef=db.collection('verse').doc(postId);
-    const snap=await likeRef.get();
     const span=btn.querySelector('span');const icon=btn.querySelector('i');
-    const n=parseInt(span.textContent)||0;
-    if(snap.exists){
-        await likeRef.delete();await postRef.update({likesCount:firebase.firestore.FieldValue.increment(-1)});
-        btn.classList.remove('liked');icon.className='fa-regular fa-heart';span.textContent=Math.max(0,n-1);likedPosts.delete(postId);
+    let n=parseInt(span.textContent)||0;
+
+    if(likedPosts.has(postId)){
+        likedPosts.delete(postId);
+        btn.classList.remove('liked');
+        icon.className='fa-regular fa-heart';
+        span.textContent=Math.max(0,n-1);
+        likeRef.delete().catch(()=>{});
+        postRef.update({likesCount:firebase.firestore.FieldValue.increment(-1)}).catch(()=>{});
     }else{
-        await likeRef.set({uid:ME.uid,ts:firebase.firestore.FieldValue.serverTimestamp()});
-        await postRef.update({likesCount:firebase.firestore.FieldValue.increment(1)});
-        btn.classList.add('liked');icon.className='fa-solid fa-heart';span.textContent=n+1;likedPosts.add(postId);
+        likedPosts.add(postId);
+        btn.classList.add('liked');
+        icon.className='fa-solid fa-heart';
+        span.textContent=n+1;
+        likeRef.set({uid:ME.uid,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+        postRef.update({likesCount:firebase.firestore.FieldValue.increment(1)}).catch(()=>{});
     }
 }
 
@@ -587,18 +650,22 @@ async function repostPost(postId,btn){
     if(!ME)return;
     const repRef=db.collection('verse').doc(postId).collection('reposts').doc(ME.uid);
     const postRef=db.collection('verse').doc(postId);
-    const snap=await repRef.get();
     const span=btn.querySelector('span');
-    const n=parseInt(span.textContent)||0;
+    let n=parseInt(span.textContent)||0;
     
-    if(snap.exists){
-        await repRef.delete();await postRef.update({repostsCount:firebase.firestore.FieldValue.increment(-1)});
-        btn.classList.remove('reposted');span.textContent=Math.max(0,n-1);repostedPosts.delete(postId);
+    if(repostedPosts.has(postId)){
+        repostedPosts.delete(postId);
+        btn.classList.remove('reposted');
+        span.textContent=Math.max(0,n-1);
+        repRef.delete().catch(()=>{});
+        postRef.update({repostsCount:firebase.firestore.FieldValue.increment(-1)}).catch(()=>{});
         toast('Condivisione revocata.','success');
     }else{
-        await repRef.set({uid:ME.uid,ts:firebase.firestore.FieldValue.serverTimestamp()});
-        await postRef.update({repostsCount:firebase.firestore.FieldValue.increment(1)});
-        btn.classList.add('reposted');span.textContent=n+1;repostedPosts.add(postId);
+        repostedPosts.add(postId);
+        btn.classList.add('reposted');
+        span.textContent=n+1;
+        repRef.set({uid:ME.uid,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+        postRef.update({repostsCount:firebase.firestore.FieldValue.increment(1)}).catch(()=>{});
         toast('Post condiviso! 🔄','success');
     }
 }
@@ -634,17 +701,24 @@ async function openPost(postId){
     activePostId=postId;
     const snap=await db.collection('verse').doc(postId).get();
     if(!snap.exists)return;
-    const data={id:snap.id,...snap.data()};
-    const v=vBadge(data.authorVerified);
-    document.getElementById('m-avatar').src=data.authorAvatar||'images/default.png';
-    document.getElementById('m-name').innerHTML=esc(data.authorName||'')+v;
-    document.getElementById('m-handle').textContent='@'+(data.username||'');
-    document.getElementById('m-content').innerHTML=fmt(data.contenuto||'');
-    document.getElementById('m-likes').textContent=data.likesCount||0;
-    document.getElementById('m-comments').textContent=data.commentsCount||0;
-    document.getElementById('m-reposts').textContent=data.repostsCount||0;
-    document.getElementById('m-views').textContent=`${(data.views||0)+1} visualizzazioni`;
-    document.getElementById('m-time').textContent=data.timestamp?fullDate(data.timestamp.toDate()):'';
+    const postData={id:snap.id,...snap.data()};
+    
+    // Get fresh user data for the modal
+    const u = await fetchUser(postData.proprietario);
+    const name = u ? `${u.nome||''} ${u.cognome||''}`.trim() : (postData.authorName || 'Utente');
+    const handle = u ? (u.username || '') : (postData.username || '');
+    const pfp = u ? (u.profileImage || 'images/default.png') : (postData.authorAvatar || 'images/default.png');
+    const isV = u ? (u.verified === true) : postData.authorVerified;
+
+    document.getElementById('m-avatar').src=pfp;
+    document.getElementById('m-name').innerHTML=esc(name)+vBadge(isV);
+    document.getElementById('m-handle').textContent='@'+handle;
+    document.getElementById('m-content').innerHTML=fmt(postData.contenuto||'');
+    document.getElementById('m-likes').textContent=postData.likesCount||0;
+    document.getElementById('m-comments').textContent=postData.commentsCount||0;
+    document.getElementById('m-reposts').textContent=postData.repostsCount||0;
+    document.getElementById('m-views').textContent=`${(postData.views||0)+1} visualizzazioni`;
+    document.getElementById('m-time').textContent=postData.timestamp?fullDate(postData.timestamp.toDate()):'';
     
     const [ls, rs]=await Promise.all([
         db.collection('verse').doc(postId).collection('likes').doc(ME.uid).get(),
@@ -671,22 +745,43 @@ function showVerifiedModal() { document.getElementById('verifiedModal').classLis
 function closeVerifiedModal() { document.getElementById('verifiedModal').classList.remove('open'); }
 document.getElementById('verifiedModal').addEventListener('click', e => { if(e.target === document.getElementById('verifiedModal')) closeVerifiedModal() });
 
+/* MODAL ALTRO */
+function openAltroModal() { document.getElementById('altroModal').classList.add('open'); }
+function closeAltroModal() { document.getElementById('altroModal').classList.remove('open'); }
+document.getElementById('altroModal').addEventListener('click', e => { if(e.target === document.getElementById('altroModal')) closeAltroModal() });
+
 /* ACTIONS IN MODAL */
 async function likeModal(){
     if(!activePostId)return;
     const btn=document.getElementById('m-btn-like');
+    const span=document.getElementById('m-likes');
+    let n=parseInt(span.textContent)||0;
     const ref=db.collection('verse').doc(activePostId).collection('likes').doc(ME.uid);
-    const snap=await ref.get();const n=parseInt(document.getElementById('m-likes').textContent)||0;
-    if(snap.exists){await ref.delete();await db.collection('verse').doc(activePostId).update({likesCount:firebase.firestore.FieldValue.increment(-1)});btn.className='post-action';btn.querySelector('i').className='fa-regular fa-heart';document.getElementById('m-likes').textContent=Math.max(0,n-1)}
-    else{await ref.set({uid:ME.uid,ts:firebase.firestore.FieldValue.serverTimestamp()});await db.collection('verse').doc(activePostId).update({likesCount:firebase.firestore.FieldValue.increment(1)});btn.className='post-action liked';btn.querySelector('i').className='fa-solid fa-heart';document.getElementById('m-likes').textContent=n+1}
+
+    if(likedPosts.has(activePostId)){
+        likedPosts.delete(activePostId);
+        btn.className='post-action';
+        btn.querySelector('i').className='fa-regular fa-heart';
+        span.textContent=Math.max(0,n-1);
+        ref.delete().catch(()=>{});
+        db.collection('verse').doc(activePostId).update({likesCount:firebase.firestore.FieldValue.increment(-1)}).catch(()=>{});
+    }else{
+        likedPosts.add(activePostId);
+        btn.className='post-action liked';
+        btn.querySelector('i').className='fa-solid fa-heart';
+        span.textContent=n+1;
+        ref.set({uid:ME.uid,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
+        db.collection('verse').doc(activePostId).update({likesCount:firebase.firestore.FieldValue.increment(1)}).catch(()=>{});
+    }
 }
 async function repostModal(){
     if(!activePostId)return;
     const btn=document.getElementById('m-btn-repost');
+    const span=document.getElementById('m-reposts');
+    let n=parseInt(span.textContent)||0;
     const ref=db.collection('verse').doc(activePostId).collection('reposts').doc(ME.uid);
-    const snap=await ref.get();const n=parseInt(document.getElementById('m-reposts').textContent)||0;
-    if(snap.exists){await ref.delete();await db.collection('verse').doc(activePostId).update({repostsCount:firebase.firestore.FieldValue.increment(-1)});btn.className='post-action';document.getElementById('m-reposts').textContent=Math.max(0,n-1);toast('Condivisione revocata.','success')}
-    else{await ref.set({uid:ME.uid,ts:firebase.firestore.FieldValue.serverTimestamp()});await db.collection('verse').doc(activePostId).update({repostsCount:firebase.firestore.FieldValue.increment(1)});btn.className='post-action reposted';document.getElementById('m-reposts').textContent=n+1;toast('Post condiviso! 🔄','success')}
+    if(repostedPosts.has(activePostId)){repostedPosts.delete(activePostId);await ref.delete();await db.collection('verse').doc(activePostId).update({repostsCount:firebase.firestore.FieldValue.increment(-1)});btn.className='post-action';span.textContent=Math.max(0,n-1);toast('Condivisione revocata.','success')}
+    else{repostedPosts.add(activePostId);await ref.set({uid:ME.uid,ts:firebase.firestore.FieldValue.serverTimestamp()});await db.collection('verse').doc(activePostId).update({repostsCount:firebase.firestore.FieldValue.increment(1)});btn.className='post-action reposted';span.textContent=n+1;toast('Post condiviso! 🔄','success')}
 }
 
 /* COMMENTS */
@@ -768,8 +863,8 @@ async function loadSuggested(){
             const avatar=d.profileImage||'images/default.png';
             const isV=d.verified===true;
             const item=document.createElement('div');item.className='follow-item';
-            item.innerHTML=`<img src="${esc(avatar)}" onerror="this.src='images/default.png'">
-                <div class="follow-info">
+            item.innerHTML=`<img src="${esc(avatar)}" onerror="this.src='images/default.png'" style="cursor:pointer" onclick="window.location.href='profile.html?user=${esc(uname)}'">
+                <div class="follow-info" style="cursor:pointer" onclick="window.location.href='profile.html?user=${esc(uname)}'">
                     <div class="follow-name">${esc(name)}${vBadge(isV)}</div>
                     <div class="follow-handle">${uname?'@'+esc(uname):''}</div>
                 </div>
@@ -894,6 +989,21 @@ document.addEventListener('keydown',e=>{
     }
     if(e.key==='n'&&!['TEXTAREA','INPUT'].includes(document.activeElement.tagName))scrollToCompose();
 });
+
+/* SCROLL TO TOP LOGIC */
+window.onscroll = function() {
+    const btn = document.getElementById("scrollToTopBtn");
+    if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
+        btn.style.display = "flex";
+    } else {
+        btn.style.display = "none";
+    }
+};
 </script>
+
+<!-- Scroll to Top Button -->
+<button id="scrollToTopBtn" class="btn-icon" style="position: fixed; bottom: 20px; right: 20px; z-index: 999; display: none;" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+    <i class="fa-solid fa-arrow-up"></i>
+</button>
 </body>
 </html>
