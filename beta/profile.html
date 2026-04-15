@@ -161,6 +161,32 @@
         /* MODALS */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); backdrop-filter: blur(10px); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
         .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .post-modal{background:var(--surface);border:1px solid var(--border);border-radius:28px;max-width:600px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.35);transform:translateY(20px) scale(.97);transition:transform .35s cubic-bezier(0.34,1.56,0.64,1)}
+        .modal-overlay.open .post-modal{transform:translateY(0) scale(1)}
+        .modal-topbar{position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:14px;z-index:10;border-radius:28px 28px 0 0}
+        .modal-body{padding:20px}
+        .modal-author-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+        .modal-author-row img{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)}
+        .modal-author-name{font-weight:800;font-size:1rem;display:flex;align-items:center;gap:5px}
+        .modal-author-handle{font-size:.8rem;color:var(--text-muted)}
+        .modal-content{font-size:1.15rem;line-height:1.65;margin-bottom:16px}
+        .modal-meta{display:flex;align-items:center;gap:6px;color:var(--text-muted);font-size:.82rem;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:14px}
+        .modal-stats{display:flex;gap:20px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:14px}
+        .modal-stat{font-size:.875rem;color:var(--text-muted)}
+        .modal-stat strong{color:var(--text);font-weight:800}
+        .modal-actions{display:flex;justify-content:space-around;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:14px}
+        .comments-section{padding:0 20px 20px}
+        .comment-input-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+        .comment-input-row img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex-shrink:0}
+        .comment-ta{flex:1;background:none;border:none;color:var(--text);font-family:'Poppins',sans-serif;font-size:.875rem;resize:none;min-height:36px;outline:none;line-height:1.5;padding-top:4px}
+        .comment-ta::placeholder{color:var(--text-muted)}
+        .btn-comment{align-self:flex-end;padding:7px 16px;border-radius:50px;background:var(--gradient);color:white;border:none;font-weight:700;font-size:.75rem;cursor:pointer;font-family:'Poppins',sans-serif}
+        .comment-item{display:flex;gap:12px;margin-bottom:16px;animation:fadeIn .3s ease both}
+        .comment-item img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0}
+        .comment-bubble{background:var(--surface-2);border:1px solid var(--border);border-radius:14px 14px 14px 4px;padding:10px 14px;flex:1}
+        .comment-author{font-weight:700;font-size:.8rem;display:flex;align-items:center;gap:4px}
+        .comment-handle{font-size:.7rem;color:var(--text-muted);margin-bottom:4px}
+        .comment-text{font-size:.85rem;line-height:1.5}
         .generic-modal { background: var(--surface); border: 1px solid var(--border-accent); border-radius: 28px; max-width: 460px; width: 100%; padding: 40px 36px; box-shadow: 0 32px 80px rgba(0,0,0,.35), 0 0 60px var(--accent-glow); transform: translateY(20px) scale(.97); transition: transform .35s cubic-bezier(0.34,1.56,0.64,1); text-align: center; }
         .modal-overlay.open .generic-modal { transform: translateY(0) scale(1); }
         .username-glyph { font-size: 3.5rem; margin-bottom: 16px; display: inline-block; color: var(--accent); }
@@ -204,10 +230,10 @@
 <div class="app-layout">
 
     <nav class="sidebar-left">
-        <a href="dashboard.html" class="logo-wrap" style="font-family: 'Poppins', sans-serif;">
-    <img src="/auraverse.jpg" alt="Aura">
-    <span class="logo-name">Aura<span>Verse</span></span>
-</a>
+        <a href="dashboard.html" class="logo-wrap">
+            <img src="media/auraverse-new.png" alt="Aura">
+            <span class="logo-name">Aura<span>Verse</span></span>
+        </a>
         <div class="nav-links">
             <a class="nav-link" href="dashboard.html"><i class="fa-solid fa-house"></i> <span>Home</span></a>
             <a class="nav-link" href="dashboard.html"><i class="fa-solid fa-magnifying-glass"></i> <span>Esplora</span></a>
@@ -281,6 +307,45 @@
     </aside>
 </div>
 
+<div class="modal-overlay" id="postModal">
+    <div class="post-modal">
+        <div class="modal-topbar">
+            <button class="btn-icon" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            <span class="modal-topbar-title">Post</span>
+        </div>
+        <div class="modal-body">
+            <div class="modal-author-row">
+                <img id="m-avatar" src="images/default.png">
+                <div>
+                    <div class="modal-author-name" id="m-name">—</div>
+                    <div class="modal-author-handle" id="m-handle">@—</div>
+                </div>
+            </div>
+            <div class="modal-content" id="m-content"></div>
+            <div class="modal-meta"><span id="m-time">—</span><span>·</span><span id="m-views" style="font-weight:600;color:var(--text)">—</span></div>
+            <div class="modal-stats">
+                <div class="modal-stat"><strong id="m-likes">0</strong> Mi piace</div>
+                <div class="modal-stat"><strong id="m-comments">0</strong> Commenti</div>
+                <div class="modal-stat"><strong id="m-reposts">0</strong> Condivisioni</div>
+            </div>
+            <div class="modal-actions">
+                <button class="post-action" id="m-btn-like" onclick="likeModal()"><i class="fa-regular fa-heart"></i></button>
+                <button class="post-action" onclick="document.getElementById('m-comment-input').focus()"><i class="fa-regular fa-comment"></i></button>
+                <button class="post-action" id="m-btn-repost" onclick="repostModal()"><i class="fa-solid fa-retweet"></i></button>
+                <button class="post-action" onclick="shareActive()"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
+            </div>
+        </div>
+        <div class="comments-section">
+            <div class="comment-input-row">
+                <img id="m-comment-avatar" src="images/default.png">
+                <textarea class="comment-ta" id="m-comment-input" placeholder="Aggiungi un commento..."></textarea>
+                <button class="btn-comment" onclick="postComment()">Rispondi</button>
+            </div>
+            <div id="comments-list"></div>
+        </div>
+    </div>
+</div>
+
 <div class="modal-overlay" id="verifiedModal">
     <div class="generic-modal">
         <div class="username-glyph"><i class="fa-solid fa-circle-check"></i></div>
@@ -325,6 +390,7 @@ let myUsername = null;
 let myFollowing = new Set();
 let likedPosts = new Set();
 let repostedPosts = new Set();
+let activePostId = null;
 
 let profileUID = null;
 let profileData = {};
@@ -337,18 +403,18 @@ let postCount = 0;
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 function fmtContent(t) {
     return esc(t)
-        .replace(/(#[\w\u00C0-\u017E]+)/g,'<span class="hashtag">$1</span>')
-        .replace(/(@\w+)/g,'<span class="mention">$1</span>')
+        .replace(/(#[\w\u00C0-\u017E]+)/g,'<span class="hashtag" onclick="event.stopPropagation()">$1</span>')
+        .replace(/(@\w+)/g,'<span class="mention" onclick="event.stopPropagation()">$1</span>')
         .replace(/\n/g,'<br>');
 }
 function fmtTime(date) {
     if (!date) return '';
-    const now = new Date(); const d = date.toDate ? date.toDate() : new Date(date);
-    const s = Math.floor((now-d)/1000);
-    if (s < 60) return s+'s'; if (s < 3600) return Math.floor(s/60)+'m';
-    if (s < 86400) return Math.floor(s/3600)+'h';
+    const d = date.toDate ? date.toDate() : new Date(date);
+    const s = Math.floor((Date.now()-d)/1000);
+    if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';
     return d.toLocaleDateString('it-IT',{day:'numeric',month:'short'});
 }
+function fullDate(d){return d.toLocaleString('it-IT',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'long',year:'numeric'})}
 
 function vBadge(v) {
     return v ? ` <i class="verified-icon fa-solid fa-circle-check" onclick="event.stopPropagation();showVerifiedModal()" title="Profilo Verificato"></i>` : '';
@@ -425,6 +491,15 @@ async function renderProfileHeader() {
     if (profileVerified) {
         document.getElementById('verified-icon').innerHTML = vBadge(true);
         document.getElementById('topbar-name-text').innerHTML = `${esc(name)}${vBadge(true)}`;
+        
+        // Aggiunge listener per la modale verifica anche sulla topbar
+        document.getElementById('topbar-name-text').style.cursor = "pointer";
+        document.getElementById('topbar-name-text').onclick = (e) => {
+            if(e.target.classList.contains('verified-icon')) {
+                e.stopPropagation();
+                showVerifiedModal();
+            }
+        };
     } else {
         document.getElementById('verified-icon').innerHTML = '';
         document.getElementById('topbar-name-text').textContent = name;
@@ -562,7 +637,7 @@ function buildCard(data) {
     const v = vBadge(data.authorVerified);
 
     div.innerHTML = `
-        <img class="post-avatar" src="${avatar}" onerror="this.src='images/default.png'" alt="">
+        <img class="post-avatar" src="${avatar}" onerror="this.src='images/default.png'" alt="" onclick="event.stopPropagation(); window.location.href='profile.html?user=${esc(handle)}'">
         <div class="post-body">
             <div class="post-header">
                 <div class="post-name">${name}${v}</div>
@@ -571,19 +646,19 @@ function buildCard(data) {
             </div>
             <div class="post-content">${fmtContent(data.contenuto||'')}</div>
             <div class="post-actions">
-                <button class="post-action" onclick="event.stopPropagation()"><i class="fa-regular fa-comment"></i> <span>${data.commentsCount||0}</span></button>
+                <button class="post-action" onclick="event.stopPropagation();openPost('${data.id}')"><i class="fa-regular fa-comment"></i> <span>${data.commentsCount||0}</span></button>
                 <button class="post-action${isReposted?' reposted':''}" id="rep-${data.id}" onclick="event.stopPropagation();repostPost('${data.id}',this)">
                     <i class="fa-solid fa-retweet"></i> <span id="repc-${data.id}">${data.repostsCount||0}</span>
                 </button>
                 <button class="post-action${isLiked?' liked':''}" id="lk-${data.id}" onclick="event.stopPropagation();likePost('${data.id}',this)">
                     <i class="fa-${isLiked?'solid':'regular'} fa-heart"></i> <span id="lkc-${data.id}">${data.likesCount||0}</span>
                 </button>
-                <button class="post-action" onclick="event.stopPropagation();copyLink('${data.id}')"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
+                <button class="post-action" onclick="event.stopPropagation();shareNative('${data.id}')"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
                 ${isOwn ? `<button class="post-action danger" style="margin-left:auto;" onclick="event.stopPropagation();deletePost('${data.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
         </div>`;
 
-    div.addEventListener('click', () => window.location.href = `dashboard.html?post=${data.id}`);
+    div.addEventListener('click', () => openPost(data.id));
     return div;
 }
 
@@ -592,23 +667,23 @@ async function likePost(postId, btn) {
     const likeRef = db.collection('verse').doc(postId).collection('likes').doc(me.uid);
     const postRef = db.collection('verse').doc(postId);
     const countEl = document.getElementById('lkc-' + postId);
-    const snap = await likeRef.get();
+    const icon = btn.querySelector('i');
     let count = parseInt(countEl?.textContent)||0;
     
-    if (snap.exists) {
-        await likeRef.delete();
-        await postRef.update({ likesCount: FieldValue.increment(-1) });
-        btn.classList.remove('liked');
-        btn.querySelector('i').className = 'fa-regular fa-heart';
-        if (countEl) countEl.textContent = Math.max(0,count-1);
+    if (likedPosts.has(postId)) {
         likedPosts.delete(postId);
+        btn.classList.remove('liked');
+        icon.className = 'fa-regular fa-heart';
+        if (countEl) countEl.textContent = Math.max(0,count-1);
+        likeRef.delete().catch(()=>{});
+        postRef.update({ likesCount: FieldValue.increment(-1) }).catch(()=>{});
     } else {
-        await likeRef.set({ uid: me.uid, ts: FieldValue.serverTimestamp() });
-        await postRef.update({ likesCount: FieldValue.increment(1) });
-        btn.classList.add('liked');
-        btn.querySelector('i').className = 'fa-solid fa-heart';
-        if (countEl) countEl.textContent = count+1;
         likedPosts.add(postId);
+        btn.classList.add('liked');
+        icon.className = 'fa-solid fa-heart';
+        if (countEl) countEl.textContent = count+1;
+        likeRef.set({ uid: me.uid, ts: FieldValue.serverTimestamp() }).catch(()=>{});
+        postRef.update({ likesCount: FieldValue.increment(1) }).catch(()=>{});
     }
 }
 
@@ -617,22 +692,21 @@ async function repostPost(postId, btn) {
     const repRef = db.collection('verse').doc(postId).collection('reposts').doc(me.uid);
     const postRef = db.collection('verse').doc(postId);
     const countEl = document.getElementById('repc-' + postId);
-    const snap = await repRef.get();
     let count = parseInt(countEl?.textContent)||0;
     
-    if(snap.exists){
-        await repRef.delete();
-        await postRef.update({repostsCount: FieldValue.increment(-1)});
+    if(repostedPosts.has(postId)){
+        repostedPosts.delete(postId);
         btn.classList.remove('reposted');
         if(countEl) countEl.textContent = Math.max(0, count-1);
-        repostedPosts.delete(postId);
+        repRef.delete().catch(()=>{});
+        postRef.update({repostsCount: FieldValue.increment(-1)}).catch(()=>{});
         toast('Condivisione revocata.','success');
     }else{
-        await repRef.set({uid: me.uid, ts: FieldValue.serverTimestamp()});
-        await postRef.update({repostsCount: FieldValue.increment(1)});
+        repostedPosts.add(postId);
         btn.classList.add('reposted');
         if(countEl) countEl.textContent = count+1;
-        repostedPosts.add(postId);
+        repRef.set({uid: me.uid, ts: FieldValue.serverTimestamp()}).catch(()=>{});
+        postRef.update({repostsCount: FieldValue.increment(1)}).catch(()=>{});
         toast('Post condiviso! 🔄','success');
     }
 }
@@ -644,10 +718,98 @@ async function deletePost(postId) {
     loadTab('posts', document.querySelector('.profile-tab.active'));
 }
 
-function copyLink(postId) {
-    navigator.clipboard.writeText(`${location.origin}/dashboard.html?post=${postId}`);
-    toast('Link copiato!','success');
+/* MODAL LOGIC */
+async function openPost(postId){
+    activePostId=postId;
+    console.log('Attempting to open modal for postId:', postId); // Debugging line
+    const snap=await db.collection('verse').doc(postId).get();
+    if(!snap.exists){
+        console.warn('Original post (ID:', postId, ') not found. Cannot open modal.'); // Debugging line
+        return;
+    }
+    const data={id:snap.id,...snap.data()};
+    const v=vBadge(data.authorVerified);
+    document.getElementById('m-avatar').src=data.authorAvatar||'images/default.png';
+    document.getElementById('m-name').innerHTML=esc(data.authorName||'')+v;
+    document.getElementById('m-handle').textContent='@'+(data.username||'');
+    document.getElementById('m-content').innerHTML=fmtContent(data.contenuto||'');
+    document.getElementById('m-likes').textContent=data.likesCount||0;
+    document.getElementById('m-comments').textContent=data.commentsCount||0;
+    document.getElementById('m-reposts').textContent=data.repostsCount||0;
+    document.getElementById('m-views').textContent=`${(data.views||0)+1} visualizzazioni`;
+    document.getElementById('m-time').textContent=data.timestamp?fullDate(data.timestamp.toDate()):'';
+    
+    const lb=document.getElementById('m-btn-like');
+    const isL = likedPosts.has(postId);
+    lb.className=isL?'post-action liked':'post-action';
+    lb.querySelector('i').className=isL?'fa-solid fa-heart':'fa-regular fa-heart';
+    const rb=document.getElementById('m-btn-repost');
+    rb.className=repostedPosts.has(postId)?'post-action reposted':'post-action';
+    
+    db.collection('verse').doc(postId).update({views:FieldValue.increment(1)}).catch(()=>{});
+    loadComments(postId);
+    document.getElementById('m-comment-avatar').src=myData.profileImage||'images/default.png';
+    document.getElementById('postModal').classList.add('open');
+    document.body.style.overflow='hidden';
 }
+function closeModal(){document.getElementById('postModal').classList.remove('open');document.body.style.overflow='';activePostId=null}
+document.getElementById('postModal').addEventListener('click',e=>{if(e.target===document.getElementById('postModal'))closeModal()});
+
+async function likeModal(){
+    if(!activePostId)return;
+    const btn=document.getElementById('m-btn-like');
+    const span=document.getElementById('m-likes');
+    let n=parseInt(span.textContent)||0;
+    const ref=db.collection('verse').doc(activePostId).collection('likes').doc(me.uid);
+    if(likedPosts.has(activePostId)){
+        likedPosts.delete(activePostId);
+        btn.className='post-action';btn.querySelector('i').className='fa-regular fa-heart';span.textContent=Math.max(0,n-1);
+        ref.delete().catch(()=>{}); db.collection('verse').doc(activePostId).update({likesCount:FieldValue.increment(-1)}).catch(()=>{});
+    } else {
+        likedPosts.add(activePostId);
+        btn.className='post-action liked';btn.querySelector('i').className='fa-solid fa-heart';span.textContent=n+1;
+        ref.set({uid:me.uid,ts:FieldValue.serverTimestamp()}).catch(()=>{}); db.collection('verse').doc(activePostId).update({likesCount:FieldValue.increment(1)}).catch(()=>{});
+    }
+}
+async function repostModal(){
+    if(!activePostId)return;
+    const btn=document.getElementById('m-btn-repost');
+    const span=document.getElementById('m-reposts');
+    let n=parseInt(span.textContent)||0;
+    const ref=db.collection('verse').doc(activePostId).collection('reposts').doc(me.uid);
+    if(repostedPosts.has(activePostId)){
+        repostedPosts.delete(activePostId);
+        btn.className='post-action';span.textContent=Math.max(0,n-1);
+        ref.delete().catch(()=>{}); db.collection('verse').doc(activePostId).update({repostsCount:FieldValue.increment(-1)}).catch(()=>{});
+    } else {
+        repostedPosts.add(activePostId);
+        btn.className='post-action reposted';span.textContent=n+1;
+        ref.set({uid:me.uid,ts:FieldValue.serverTimestamp()}).catch(()=>{}); db.collection('verse').doc(activePostId).update({repostsCount:FieldValue.increment(1)}).catch(()=>{});
+    }
+}
+async function loadComments(postId){
+    const el=document.getElementById('comments-list'); el.innerHTML='<div class="feed-loading" style="padding:20px"><div class="spinner"></div></div>';
+    try{
+        const snap=await db.collection('verse').doc(postId).collection('commenti').orderBy('timestamp','asc').limit(50).get();
+        el.innerHTML=''; if(snap.empty){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:.82rem">Nessun commento ancora.</div>';return}
+        snap.forEach(doc=>{
+            const c=doc.data(); const item=document.createElement('div'); item.className='comment-item';
+            item.innerHTML=`<img src="${esc(c.authorAvatar||'images/default.png')}" onerror="this.src='images/default.png'"><div class="comment-bubble"><div class="comment-author">${esc(c.authorName||'Utente')}${vBadge(c.authorVerified)}</div><div class="comment-handle">@${esc(c.username||'')} · ${fmtTime(c.timestamp)}</div><div class="comment-text">${fmtContent(c.contenuto||'')}</div></div>`;
+            el.appendChild(item);
+        });
+    }catch(e){}
+}
+async function postComment(){
+    const text=document.getElementById('m-comment-input').value.trim(); if(!text||!me||!activePostId)return;
+    try{
+        await db.collection('verse').doc(activePostId).collection('commenti').add({ contenuto:text, authorName:`${myData.nome||''} ${myData.cognome||''}`.trim(), username:myUsername||'', authorAvatar:myData.profileImage||'', authorVerified:myData.verified===true, uid:me.uid, timestamp:FieldValue.serverTimestamp() });
+        await db.collection('verse').doc(activePostId).update({commentsCount:FieldValue.increment(1)});
+        document.getElementById('m-comment-input').value=''; document.getElementById('m-comments').textContent=parseInt(document.getElementById('m-comments').textContent||'0')+1;
+        loadComments(activePostId); toast('Commento pubblicato!','success');
+    }catch(e){toast('Errore: '+e.message,'error')}
+}
+function shareNative(postId){const url=`${location.origin}/dashboard.html?post=${postId}`;if(navigator.share)navigator.share({title:'Post su AuraVerse',url});else{navigator.clipboard.writeText(url);toast('Link copiato!','success')}}
+function shareActive(){if(activePostId)shareNative(activePostId)}
 
 function emptyState(icon,title,desc) {
     return `<div class="empty-state"><span class="empty-state-icon"><i class="fa-solid ${icon}"></i></span><h3>${title}</h3><p>${desc}</p></div>`;
