@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog | AuraVerse</title>
+    <link rel="icon" href="images/aura-nobg.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --accent: #F05BFF; --accent-soft: rgba(240,91,255,0.10); --accent-glow: rgba(240,91,255,0.22);
+            --gradient: linear-gradient(135deg,#F05BFF,#7000FF);
+            --gradient-text: linear-gradient(135deg,#F05BFF 0%,#a855f7 50%,#7000FF 100%);
+            --bg: #f2f2f7; --surface: #ffffff; --surface-2: rgba(0,0,0,0.033);
+            --text: #1d1d1f; --text-muted: #6e6e73; --border: rgba(0,0,0,0.07);
+            --shadow: 0 8px 32px rgba(0,0,0,0.05);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0b0b0e; --surface: rgba(18,18,22,0.95); --surface-2: rgba(255,255,255,0.04);
+                --text: #f5f5f7; --text-muted: #a1a1a6; --border: rgba(255,255,255,0.08);
+                --shadow: 0 12px 40px rgba(0,0,0,0.4);
+            }
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); font-family: 'Poppins', sans-serif; line-height: 1.6; padding-bottom: 80px; }
+        
+        .container { max-width: 700px; margin: 0 auto; padding: 40px 20px; }
+        
+        .header { text-align: center; margin-bottom: 60px; }
+        .header h1 { font-family: 'DM Serif Display', serif; font-size: 2.5rem; margin-bottom: 10px; }
+        .header h1 span { background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .header p { color: var(--text-muted); font-size: 1rem; font-weight: 300; }
+
+        .back-nav { margin-bottom: 30px; }
+        .btn-back { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+        .btn-back:hover { color: var(--accent); }
+
+        /* Timeline logic */
+        .timeline { position: relative; padding-left: 30px; border-left: 2px solid var(--border); margin-left: 10px; }
+        
+        .version-block { position: relative; margin-bottom: 50px; }
+        .version-block::before {
+            content: ''; position: absolute; left: -41px; top: 0;
+            width: 20px; height: 20px; border-radius: 50%;
+            background: var(--bg); border: 4px solid var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .version-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 15px; }
+        .version-tag { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
+        .version-date { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+
+        .card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
+            padding: 24px; box-shadow: var(--shadow); backdrop-filter: blur(10px);
+        }
+
+        .change-group { margin-bottom: 20px; }
+        .change-group:last-child { margin-bottom: 0; }
+        
+        .group-label {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; border-radius: 50px;
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.05em; margin-bottom: 12px;
+        }
+        
+        /* Types colors */
+        .label-new { background: rgba(48,209,88,0.1); color: #30d158; }
+        .label-fix { background: rgba(255,107,107,0.1); color: #ff6b6b; }
+        .label-imp { background: var(--accent-soft); color: var(--accent); }
+
+        .change-list { list-style: none; }
+        .change-item {
+            display: flex; align-items: flex-start; gap: 10px;
+            font-size: 0.9rem; color: var(--text); margin-bottom: 8px;
+            font-weight: 400;
+        }
+        .change-item i { font-size: 0.6rem; margin-top: 8px; color: var(--text-muted); opacity: 0.5; }
+
+        /* Floating badge for latest */
+        .latest-badge {
+            background: var(--gradient); color: white; padding: 2px 8px;
+            border-radius: 6px; font-size: 0.65rem; font-weight: 800;
+            vertical-align: middle; margin-left: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 2rem; }
+            .version-tag { font-size: 1.25rem; }
+            .card { padding: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <nav class="back-nav">
+        <a href="dashboard.html" class="btn-back">
+            <i class="fa-solid fa-arrow-left"></i> Torna alla Dashboard
+        </a>
+    </nav>
+
+    <header class="header">
+        <h1><span>Changelog</span> AuraVerse</h1>
+        <p>Scopri tutte le novità, i miglioramenti e i fix della piattaforma.</p>
+    </header>
+
+    <div class="timeline">
+        
+        <!-- VERSIONE 1.2.0 -->
+        <div class="version-block">
+            <div class="version-header">
+                <span class="version-tag">v1.2.0 BETA</span>
+                <span class="latest-badge">LATEST</span>
+                <span class="version-date">15 Aprile 2026</span>
+            </div>
+            <div class="card">
+                <div class="change-group">
+                    <span class="group-label label-new"><i class="fa-solid fa-star"></i> Novità</span>
+                    <ul class="change-list">
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Social Experience: Avatar cliccabili per navigare velocemente tra i profili.</li>
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> User Sync: Dati utente (nome e foto) ora dinamici su tutti i post, anche quelli vecchi.</li>
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Timeline UI: Nuova pagina Changelog per tracciare l'evoluzione di AuraVerse.</li>
+                    </ul>
+                </div>
+                <div class="change-group">
+                    <span class="group-label label-imp"><i class="fa-solid fa-rocket"></i> Miglioramenti</span>
+                    <ul class="change-list">
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Optimistic UI: Like e Repost ora sono istantanei, senza attese del database.</li>
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Modal System: La finestra dei post nel profilo ora è completa di commenti e azioni.</li>
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Navigation: Aggiunto pulsante "Torna su" dinamico nella dashboard.</li>
+                    </ul>
+                </div>
+                <div class="change-group">
+                    <span class="group-label label-fix"><i class="fa-solid fa-bug"></i> Bug Fix</span>
+                    <ul class="change-list">
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Corretto l'allineamento dei badge verificati nelle modali.</li>
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Fixato il caricamento infinito della scheda "Condivisi" nel profilo.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- VERSIONE 1.1.0 -->
+        <div class="version-block">
+            <div class="version-header">
+                <span class="version-tag">v1.1.0 BETA</span>
+                <span class="version-date">7 Aprile 2026</span>
+            </div>
+            <div class="card">
+                <div class="change-group">
+                    <span class="group-label label-new"><i class="fa-solid fa-star"></i> Novità</span>
+                    <ul class="change-list">
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Sistema di Repost: Condividi i post degli altri utenti sulla tua bacheca.</li>
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Badge Verificato: Identifica gli account ufficiali con la spunta Aura.</li>
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Suggerimenti: Widget "Da seguire" dinamico basato sugli utenti attivi.</li>
+                    </ul>
+                </div>
+                <div class="change-group">
+                    <span class="group-label label-imp"><i class="fa-solid fa-rocket"></i> Miglioramenti</span>
+                    <ul class="change-list">
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Search Engine: Ricerca migliorata per hashtag e menzioni.</li>
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Performance: Ridotto del 40% il tempo di caricamento del feed iniziale.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- VERSIONE 1.0.0 -->
+        <div class="version-block">
+            <div class="version-header">
+                <span class="version-tag">v1.0.0 BETA</span>
+                <span class="version-date">29Marzo 2026</span>
+            </div>
+            <div class="card">
+                <div class="change-group">
+                    <span class="group-label label-imp"><i class="fa-solid fa-flag-checkered"></i> Lancio Ufficiale</span>
+                    <ul class="change-list">
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Benvenuti su AuraVerse! Prima release pubblica della piattaforma social di Aura Studio.</li>
+                        <li class="change-item"><i class="fa-solid fa-circle"></i> Funzioni base: Feed, Post, Like, Profili Utente e Integrazione AuraID.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer style="margin-top: 40px; text-align: center; color: var(--text-muted); font-size: 0.8rem;">
+        Aura Studio Italia © 2025 · Build 2024.120
+    </footer>
+</div>
+
+<script>
+    // Semplice effetto fade-in per i blocchi della timeline allo scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.version-block').forEach(block => {
+        block.style.opacity = '0';
+        block.style.transform = 'translateY(20px)';
+        block.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+        observer.observe(block);
+    });
+</script>
+</body>
+</html>
