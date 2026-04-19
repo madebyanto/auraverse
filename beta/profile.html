@@ -720,7 +720,7 @@ function buildCard(data) {
     // Contenuto poll
     let pollHtml='';
     if(data.poll){
-        pollHtml=buildPollHtml(data.id, data.poll);
+        pollHtml=buildPollHtml(data.id, data.poll, data.proprietario);
     }
 
     div.innerHTML = `
@@ -753,13 +753,14 @@ function buildCard(data) {
 /* ═══════════════════════════════════════════════
    POLL RENDERING
 ═══════════════════════════════════════════════ */
-function buildPollHtml(postId, poll){
+function buildPollHtml(postId, poll, ownerUid){
     const now=new Date();
     const expired=poll.expires?.toDate()<now;
     const total=poll.totalVotes||0;
     const myVote=poll.votes?.[me?.uid];
-    const canVote=!expired&&!myVote;
-    const showPct=expired||!!myVote;
+    const isOwner = me && me.uid === ownerUid;
+    const canVote=!expired && !isOwner;
+    const showPct=expired||(myVote !== undefined);
     const opts=poll.options||[];
     const winnerVotes=Math.max(...opts.map((_,i)=>poll.votes&&Object.values(poll.votes).filter(v=>v===i).length||0));
 
@@ -775,7 +776,10 @@ function buildPollHtml(postId, poll){
         html+=`<div class="poll-option${showPct?' voted':''}${isWinner?' winner':''}${isMyVote?' my-vote':''}" onclick="${canVote?`votePoll('${postId}',${i})`:''}">
             ${showPct?`<div class="poll-fill" style="width:${pct}%"></div>`:''}
             <span class="poll-option-text">${esc(opt)}</span>
-            ${showPct?`<span class="poll-option-pct">${pct}%</span>`:''}
+            <div style="display:flex; align-items:center; gap:8px; position:relative;">
+                ${isOwner && total > 0 ? `<i class="fa-solid fa-users-viewfinder" style="font-size:0.7rem; color:var(--accent); cursor:pointer;" onclick="event.stopPropagation(); showVoters('${postId}', ${i})" title="Vedi chi ha votato"></i>` : ''}
+                ${showPct?`<span class="poll-option-pct">${pct}%</span>`:''}
+            </div>
         </div>`;
     });
     const expiresLabel=expired?'Sondaggio chiuso':`Scade ${fmtTime(poll.expires)}`;
@@ -784,31 +788,113 @@ function buildPollHtml(postId, poll){
 }
 
 async function votePoll(postId, optionIndex){
-    if(!me) return;
-    const postRef=db.collection('verse').doc(postId);
-    try{
-        await postRef.update({
-            [`poll.votes.${me.uid}`]:optionIndex,
-            'poll.totalVotes':firebase.firestore.FieldValue.increment(1)
-        });
-        toast('Voto registrato! 📊','success');
-        const snap=await postRef.get();
-        if(snap.exists){
-            const newData={id:snap.id,...snap.data()};
-            // Aggiorna card nel feed
-            const cards = document.querySelectorAll('.post-card');
-            cards.forEach(c => {
-                const pollBox = c.querySelector(`[id="lk-${postId}"]`)?.closest('.post-card')?.querySelector('.poll-card');
-                if(pollBox) pollBox.outerHTML = buildPollHtml(postId, newData.poll);
-            });
-            
-            // Aggiorna modal
-            if(activePostId === postId) {
-                const mpollbox = document.getElementById('m-poll-box');
-                if(mpollbox) mpollbox.innerHTML = buildPollHtml(postId, newData.poll);
-            }
+    if(!me || window['voting_' + postId]) return;
+    window['voting_' + postId] = true;
+
+    try {
+        const postRef = db.collection('verse').doc(postId);
+        const snap = await postRef.get();
+        if(!snap.exists) return;
+        const data = snap.data();
+
+        // L'host non può votare
+        if (me.uid === data.proprietario) {
+            toast('Non puoi votare nel tuo sondaggio!', 'error');
+            return;
         }
-    }catch(e){toast('Errore nel voto.','error')}
+
+        const poll = data.poll;
+        const oldVote = poll.votes ? poll.votes[me.uid] : undefined;
+        let incrementValue = 0;
+        let newVotes = { ...(poll.votes || {}) };
+
+        if (oldVote === optionIndex) {
+            // Rimozione voto
+            delete newVotes[me.uid];
+            incrementValue = -1;
+            toast('Voto rimosso.', 'success');
+        } else {
+            // Aggiunta o modifica voto
+            newVotes[me.uid] = optionIndex;
+            incrementValue = (oldVote === undefined) ? 1 : 0;
+            toast(oldVote === undefined ? 'Voto registrato! 📊' : 'Voto modificato! 📊', 'success');
+        }
+
+        // Aggiornamento ottimistico locale
+        poll.votes = newVotes;
+        poll.totalVotes = (poll.totalVotes || 0) + incrementValue;
+
+        // Rendering immediato della UI
+        const updatedHtml = buildPollHtml(postId, poll, data.proprietario);
+        document.querySelectorAll('.post-card').forEach(c => {
+            const pollBox = c.querySelector(`[id="lk-${postId}"]`)?.closest('.post-card')?.querySelector('.poll-card');
+            if(pollBox) pollBox.outerHTML = updatedHtml;
+        });
+
+        if(activePostId === postId) {
+            const mpollbox = document.getElementById('m-poll-box');
+            if(mpollbox) mpollbox.innerHTML = updatedHtml;
+        }
+
+        // Aggiornamento database
+        const updateData = {
+            'poll.totalVotes': firebase.firestore.FieldValue.increment(incrementValue)
+        };
+        if (oldVote === optionIndex) {
+            updateData[`poll.votes.${me.uid}`] = firebase.firestore.FieldValue.delete();
+        } else {
+            updateData[`poll.votes.${me.uid}`] = optionIndex;
+        }
+        await postRef.update(updateData);
+    } catch(e) {
+        toast('Errore nel voto.','error');
+    } finally {
+        delete window['voting_' + postId];
+    }
+}
+
+async function showVoters(postId, optionIndex) {
+    const snap = await db.collection('verse').doc(postId).get();
+    if (!snap.exists) return;
+    const poll = snap.data().poll;
+    if (!poll || !poll.votes) return;
+
+    const uids = Object.entries(poll.votes)
+        .filter(([uid, choice]) => choice === optionIndex)
+        .map(([uid, choice]) => uid);
+
+    if (uids.length === 0) {
+        toast('Nessun voto per questa opzione.', 'error');
+        return;
+    }
+
+    document.getElementById('list-modal-title').textContent = 'Votanti: ' + poll.options[optionIndex];
+    const content = document.getElementById('list-modal-content');
+    content.innerHTML = '<div class="feed-loading" style="padding:40px 20px;"><div class="spinner"></div></div>';
+    document.getElementById('listModal').classList.add('open');
+
+    content.innerHTML = '';
+    for (let uid of uids) {
+        const u = await db.collection('users').doc(uid).get();
+        if (!u.exists) continue;
+        const d = u.data();
+        const nSnap = await db.collection('nicknames').where('uid','==',uid).limit(1).get();
+        const uname = nSnap.empty ? '' : nSnap.docs[0].id;
+        if(!uname) continue;
+
+        const name = `${d.nome || ''} ${d.cognome || ''}`.trim() || 'Utente Aura';
+        const avatar = d.profileImage || 'images/default.png';
+        const isV = d.verified === true;
+
+        const item = document.createElement('div');
+        item.className = 'follow-item';
+        item.style.padding = '12px 20px';
+        item.style.cursor = 'pointer';
+        item.style.borderBottom = '1px solid var(--border)';
+        item.onclick = () => window.location.href = `profile.html?user=${uname}`;
+        item.innerHTML = `<img src="${esc(avatar)}" onerror="this.src='images/default.png'"><div class="follow-info"><div class="follow-name">${esc(name)}${vBadge(isV)}</div><div class="follow-handle">@${esc(uname)}</div></div>`;
+        content.appendChild(item);
+    }
 }
 
 async function likePost(postId, btn) {
