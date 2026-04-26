@@ -35,6 +35,7 @@
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: var(--bg); color: var(--text); font-family: 'Poppins', sans-serif; min-height: 100vh; }
         body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: .5; }
+        img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; }
 
         .app-layout { display: grid; grid-template-columns: 260px 1fr 300px; min-height: 100vh; max-width: 1280px; margin: 0 auto; position: relative; z-index: 1; }
 
@@ -123,9 +124,17 @@
         .poll-option.my-vote .poll-option-text::before{content:'✓';color:var(--accent);font-weight:900;font-size:.8rem}
         .poll-footer{padding:8px 14px;font-size:.72rem;color:var(--text-muted);display:flex;gap:12px}
 
+        /* IMAGE VIEWER */
+        .image-viewer-content { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .viewer-topbar { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); z-index: 10; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .viewer-actions { display: flex; gap: 10px; }
+        .image-scroll-container { flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; position: relative; }
+        #viewer-img { max-width: 95%; max-height: 95%; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: grab; user-select: none; }
+        #viewer-img:active { cursor: grabbing; }
+
         /* PENSIERO BUBBLE */
-        .pensiero-bubble { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--border-accent); border-radius: 12px; padding: 4px 10px; font-size: .62rem; font-weight: 700; white-space: nowrap; max-width: 130px; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 4px 12px rgba(0,0,0,.15); color: var(--text); pointer-events: none; text-align: center; line-height: 1.3; z-index: 10; transition: var(--transition); }
-        .pensiero-bubble::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--border-accent); }
+        .pensiero-bubble { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--surface); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1.5px solid var(--border-accent); border-radius: 20px; padding: 5px 12px; font-size: .65rem; font-weight: 700; white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 8px 16px rgba(0,0,0,0.15); color: var(--text); pointer-events: none; text-align: center; line-height: 1.2; z-index: 10; transition: var(--transition); }
+        .pensiero-bubble::after { content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid var(--border-accent); }
 
         /* POSTS */
         .feed-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; gap: 12px; color: var(--text-muted); }
@@ -370,6 +379,23 @@
     </div>
 </div>
 
+<!-- IMAGE VIEWER MODAL -->
+<div class="modal-overlay" id="imageViewerModal">
+    <div class="image-viewer-content">
+        <div class="viewer-topbar">
+            <button class="btn-icon" onclick="closeImageViewer()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="viewer-actions">
+                <button class="btn-icon" onclick="zoomImage(1.2)" title="Zoom In"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                <button class="btn-icon" onclick="zoomImage(0.8)" title="Zoom Out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                <button class="btn-icon" id="btn-download-image" title="Scarica con watermark"><i class="fa-solid fa-download"></i></button>
+            </div>
+        </div>
+        <div class="image-scroll-container" id="image-scroll-container">
+            <img id="viewer-img" src="" alt="" onclick="event.stopPropagation()" oncontextmenu="return false;" draggable="false">
+        </div>
+    </div>
+</div>
+
 <div class="modal-overlay" id="verifiedModal">
     <div class="generic-modal">
         <div class="username-glyph"><i class="fa-solid fa-circle-check"></i></div>
@@ -492,6 +518,7 @@ auth.onAuthStateChanged(async user => {
         // Load my following list
         const fSnap = await db.collection('users').doc(me.uid).collection('verse').get();
         fSnap.forEach(d => myFollowing.add(d.id));
+        await cleanupExpiredPensieri();
     } catch(e) {}
     await resolveProfile();
     loadSuggested();
@@ -524,6 +551,68 @@ async function resolveProfile() {
         loadTab('posts', document.querySelector('.profile-tab.active'));
     } catch(e) { showError('Errore: ' + e.message); }
 }
+
+/* ═══════════════════════════════════════════════
+   PENSIERI LOGIC & CLEANUP
+═══════════════════════════════════════════════ */
+async function cleanupExpiredPensieri(){
+    if(!me) return;
+    const now = Date.now();
+    const cutoff = now - 24*60*60*1000;
+    try {
+        const snap = await db.collection('pensieri')
+            .where('uid', '==', me.uid)
+            .get();
+        const batch = db.batch();
+        let found = false;
+        snap.forEach(doc => {
+            const ts = doc.data().timestamp?.toDate().getTime();
+            if(ts && ts < cutoff) { batch.delete(doc.ref); found = true; }
+        });
+        if(found) await batch.commit();
+    } catch(e) { console.error("Errore cleanup pensieri:", e); }
+}
+
+async function viewPensiero(pensieroId, isMine) {
+    const snap = await db.collection('pensieri').doc(pensieroId).get();
+    if(!snap.exists) return;
+    const p = snap.data();
+    const u = profileData; // Siamo già sul profilo dell'utente
+    const name = `${u.nome||''} ${u.cognome||''}`.trim();
+    const avatar = u.profileImage || 'images/default.png';
+    const expires = p.timestamp?.toDate();
+    
+    const diffMs = expires ? (expires.getTime() + 24*60*60*1000 - Date.now()) : 0;
+    const expiresIn = diffMs > 3600000 ? Math.floor(diffMs/3600000) + "h" : Math.max(0, Math.floor(diffMs/60000)) + "m";
+
+    document.getElementById('pm-avatar').src = avatar;
+    document.getElementById('pm-name').textContent = name;
+    document.getElementById('pm-handle').textContent = '@' + profileUsername;
+    document.getElementById('pm-content').textContent = p.contenuto || '';
+    document.querySelector('#pm-expires span').textContent = `Scade tra ${expiresIn}`;
+    
+    const actions = document.getElementById('pensiero-modal-actions');
+    actions.innerHTML = '';
+    if(isMine){
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-icon';
+        delBtn.innerHTML = '<i class="fa-solid fa-trash" style="color:#ff6b6b;"></i>';
+        delBtn.onclick = () => { if(confirm("Eliminare questo pensiero?")) deletePensiero(pensieroId); };
+        actions.appendChild(delBtn);
+    }
+    document.getElementById('pensieroModal').classList.add('open');
+}
+
+async function deletePensiero(pensieroId){
+    try {
+        await db.collection('pensieri').doc(pensieroId).delete();
+        toast('Pensiero eliminato dal database.','success');
+        closePensieroModal();
+        renderProfileHeader(); // Refresh avatar bubble
+    } catch(e) { toast('Errore eliminazione','error'); }
+}
+
+function closePensieroModal(){ document.getElementById('pensieroModal').classList.remove('open'); }
 
 async function renderProfileHeader() {
     const d = profileData;
@@ -717,6 +806,18 @@ function buildCard(data) {
     const isReposted = repostedPosts.has(data.id);
     const v = vBadge(data.authorVerified);
 
+    // GIF
+    let gifHtml='';
+    if(data.gifUrl){
+        gifHtml=`<img src="${esc(data.gifUrl)}" style="width:100%;border-radius:14px;height:auto;display:block;margin-bottom:10px;cursor:default" onclick="event.stopPropagation()" oncontextmenu="return false;" draggable="false" alt="GIF" loading="lazy">`;
+    }
+
+    // Image
+    let imgHtml='';
+    if(data.postImage){
+        imgHtml=`<img src="${esc(data.postImage)}" style="width:100%;border-radius:14px;height:auto;display:block;margin-bottom:10px;cursor:pointer" onclick="event.stopPropagation();openImageViewer('${esc(data.postImage)}','${esc(handle)}')" oncontextmenu="return false;" draggable="false" alt="Post image" loading="lazy">`;
+    }
+
     // Contenuto poll
     let pollHtml='';
     if(data.poll){
@@ -732,6 +833,8 @@ function buildCard(data) {
                 <span class="post-time">${time}</span>
             </div>
             <div class="post-content">${fmtContent(data.contenuto||'')}</div>
+            ${gifHtml}
+            ${imgHtml}
             ${pollHtml}
             <div class="post-actions">
                 <button class="post-action" onclick="event.stopPropagation();openPost('${data.id}')"><i class="fa-regular fa-comment"></i> <span>${data.commentsCount||0}</span></button>
@@ -968,6 +1071,30 @@ async function openPost(postId){
     document.getElementById('m-name').innerHTML=esc(data.authorName||'')+v;
     document.getElementById('m-handle').textContent='@'+(data.username||'');
     document.getElementById('m-content').innerHTML=fmtContent(data.contenuto||'');
+
+    // GIF nel modal
+    const gifInModal=document.getElementById('m-gif');
+    if(gifInModal) gifInModal.remove();
+    if(data.gifUrl){
+        const gifImg=document.createElement('img');
+        gifImg.id='m-gif';
+        gifImg.src=data.gifUrl;
+        gifImg.style.cssText='width:100%;border-radius:14px;height:auto;display:block;margin-bottom:12px';
+        document.getElementById('m-content').after(gifImg);
+    }
+
+    // Image nel modal
+    const imgInModal=document.getElementById('m-img');
+    if(imgInModal) imgInModal.remove();
+    if(data.postImage){
+        const postImg=document.createElement('img');
+        postImg.id='m-img';
+        postImg.src=data.postImage;
+        postImg.style.cssText='width:100%;border-radius:14px;height:auto;display:block;margin-bottom:12px;cursor:pointer';
+        postImg.setAttribute('oncontextmenu', 'return false;'); postImg.setAttribute('draggable', 'false');
+        postImg.onclick = (e) => { e.stopPropagation(); openImageViewer(data.postImage, data.username); };
+        document.getElementById('m-content').after(postImg);
+    }
     document.getElementById('m-likes').textContent=data.likesCount||0;
     document.getElementById('m-comments').textContent=data.commentsCount||0;
     document.getElementById('m-reposts').textContent=data.repostsCount||0;
@@ -1128,6 +1255,76 @@ async function openFollowList(type) {
     }
 }
 function closeListModal() { document.getElementById('listModal').classList.remove('open'); }
+
+/* ═══════════════════════════════════════════════
+   IMAGE VIEWER & WATERMARK
+═══════════════════════════════════════════════ */
+let currentZoom = 1;
+function openImageViewer(url, authorHandle) {
+    const modal = document.getElementById('imageViewerModal');
+    const img = document.getElementById('viewer-img');
+    img.src = url;
+    currentZoom = 1;
+    img.style.transform = `scale(${currentZoom})`;
+    document.getElementById('btn-download-image').onclick = () => downloadWithWatermark(url, authorHandle);
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeImageViewer() {
+    document.getElementById('imageViewerModal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+function zoomImage(factor) {
+    currentZoom *= factor;
+    currentZoom = Math.min(Math.max(currentZoom, 0.5), 5);
+    document.getElementById('viewer-img').style.transform = `scale(${currentZoom})`;
+}
+async function downloadWithWatermark(url, author) {
+    toast("Generazione immagine...", "info");
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = url;
+    img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        const fontSize = Math.max(16, Math.floor(canvas.width / 45));
+        ctx.font = `600 ${fontSize}px Poppins, sans-serif`;
+        const text = `Da un post AuraVerse di @${author}`;
+        const metrics = ctx.measureText(text);
+        const textWidth = metrics.width;
+        const padding = fontSize * 0.8;
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        const x = canvas.width - textWidth - padding * 2 - 20;
+        const y = canvas.height - fontSize - padding * 2 - 20;
+        const w = textWidth + padding * 2;
+        const h = fontSize + padding * 2;
+        const r = 10;
+        ctx.beginPath();
+        ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = 'white';
+        ctx.fillText(text, canvas.width - textWidth - padding - 20, canvas.height - padding - 20);
+        const link = document.createElement('a');
+        link.download = `AuraVerse-${author}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        toast("Immagine scaricata!", "success");
+    };
+}
+document.getElementById('imageViewerModal').onclick = (e) => {
+    if(e.target === document.getElementById('imageViewerModal') || e.target === document.getElementById('image-scroll-container')) closeImageViewer();
+};
+
+document.getElementById('image-scroll-container').addEventListener('wheel', (e) => {
+    if (document.getElementById('imageViewerModal').classList.contains('open')) {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.1 : 0.9;
+        zoomImage(factor);
+    }
+}, { passive: false });
 
 /* Chiudi le modali cliccando fuori */
 document.getElementById('verifiedModal').addEventListener('click', e => { if(e.target === document.getElementById('verifiedModal')) closeVerifiedModal(); });

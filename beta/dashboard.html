@@ -34,6 +34,7 @@
         *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
         body{background:var(--bg);color:var(--text);font-family:'Poppins',sans-serif;min-height:100vh;line-height:1.6}
         body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
+        img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; }
         .app-layout{display:grid;grid-template-columns:260px 1fr 300px;min-height:100vh;max-width:1280px;margin:0 auto;position:relative;z-index:1}
 
         /* SIDEBAR LEFT */
@@ -76,17 +77,22 @@
         .algo-option.active .check-icon{display:block}
 
         /* PENSIERI (Stories-like) */
-        .pensieri-bar{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;align-items:flex-start}
+        .pensieri-bar{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;gap:18px;overflow-x:auto;scrollbar-width:none;align-items:flex-start;background:var(--surface-2)}
         .pensieri-bar::-webkit-scrollbar{display:none}
-        .pensiero-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;width:68px}
-        .pensiero-avatar-wrap{position:relative;width:56px;height:56px}
-        .pensiero-avatar-wrap img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2.5px solid var(--border);transition:var(--transition)}
-        .pensiero-avatar-wrap.has-thought img{border-color:var(--accent)}
+        .pensiero-item{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;flex-shrink:0;width:72px}
+        .pensiero-avatar-wrap{position:relative;width:62px;height:62px}
+        .pensiero-avatar-wrap img{width:62px;height:62px;border-radius:50%;object-fit:cover;border:2.5px solid var(--border);transition:var(--transition);padding:2px;background:var(--surface)}
+        .pensiero-avatar-wrap.has-thought img{border-color:var(--accent);animation:thoughtPulse 3s infinite}
+        @keyframes thoughtPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); box-shadow: 0 0 15px var(--accent-soft); }
+            100% { transform: scale(1); }
+        }
         .pensiero-avatar-wrap.my-add img{border-color:var(--border);opacity:.85}
-        .pensiero-bubble{position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border-accent);border-radius:12px;padding:4px 8px;font-size:.58rem;font-weight:600;white-space:nowrap;max-width:110px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 4px 12px rgba(0,0,0,.12);color:var(--text);pointer-events:none;text-align:center;line-height:1.3}
-        .pensiero-bubble::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid var(--border-accent)}
-        .pensiero-name{font-size:.62rem;color:var(--text-muted);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;font-weight:500}
-        .pensiero-add-btn{position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;border-radius:50%;background:var(--gradient);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:10px;color:white;font-weight:900}
+        .pensiero-bubble{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--surface);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid var(--border-accent);border-radius:20px;padding:5px 10px;font-size:.62rem;font-weight:700;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 8px 16px rgba(0,0,0,0.12);color:var(--text);pointer-events:none;text-align:center;line-height:1.2;z-index:5}
+        .pensiero-bubble::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:6px solid var(--border-accent)}
+        .pensiero-name{font-size:.65rem;color:var(--text-muted);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;font-weight:600;margin-top:2px}
+        .pensiero-add-btn{position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--gradient);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:900;box-shadow:0 2px 8px var(--accent-glow)}
 
         /* COMPOSE */
         .compose-box{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;gap:14px;align-items:flex-start}
@@ -113,16 +119,24 @@
         .mention-dd-item span{color:var(--text-muted);font-size:.75rem}
 
         /* GIF PICKER */
-        .gif-picker{position:absolute;bottom:calc(100% + 8px);left:0;width:320px;background:var(--surface);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-hover);z-index:300;overflow:hidden;animation:dropIn .2s ease}
-        .gif-picker-search{padding:10px;border-bottom:1px solid var(--border)}
-        .gif-picker-search input{width:100%;padding:8px 12px;border-radius:50px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-family:'Poppins',sans-serif;font-size:.82rem;outline:none}
+        .gif-picker{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:540px;max-width:95vw;background:var(--surface);border:1px solid var(--border);border-radius:28px;box-shadow:0 24px 60px rgba(0,0,0,0.3);z-index:1001;overflow:hidden;animation:gifPopIn .3s cubic-bezier(0.34,1.56,0.64,1);display:flex;flex-direction:column}
+        .gif-picker-search{padding:14px;border-bottom:1px solid var(--border)}
+        .gif-picker-search input{width:100%;padding:10px 16px;border-radius:50px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-family:'Poppins',sans-serif;font-size:.9rem;outline:none}
         .gif-picker-search input:focus{border-color:var(--border-accent)}
-        .gif-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:8px;max-height:260px;overflow-y:auto}
-        .gif-grid img{width:100%;border-radius:8px;cursor:pointer;aspect-ratio:16/9;object-fit:cover;transition:opacity .2s}
-        .gif-grid img:hover{opacity:.85}
-        .gif-preview-in-compose{position:relative;margin-top:10px;border-radius:14px;overflow:hidden;max-height:200px}
-        .gif-preview-in-compose img{width:100%;object-fit:cover;border-radius:14px}
+        .gif-grid{columns:3;column-gap:10px;padding:14px;max-height:500px;overflow-y:auto;scrollbar-width:thin;display:block}
+        .gif-grid img{width:100%;height:auto !important;margin-bottom:10px;border-radius:12px;cursor:pointer;display:block;transition:var(--transition);break-inside:avoid;object-fit:contain}
+        .gif-grid img:hover{opacity:.8;transform:scale(1.02)}
+        .gif-preview-in-compose{position:relative;margin-top:10px;border-radius:14px;overflow:hidden}
+        .gif-preview-in-compose img{width:100%;height:auto;border-radius:14px}
         .gif-preview-in-compose .remove-gif{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.6);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px}
+
+        /* IMAGE VIEWER */
+        .image-viewer-content { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .viewer-topbar { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); z-index: 10; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .viewer-actions { display: flex; gap: 10px; }
+        .image-scroll-container { flex: 1; overflow: auto; display: flex; align-items: center; justify-content: center; position: relative; }
+        #viewer-img { max-width: 95%; max-height: 95%; transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: grab; user-select: none; }
+        #viewer-img:active { cursor: grabbing; }
 
         /* SONDAGGIO */
         .poll-builder{margin-top:10px;padding:12px;border:1px solid var(--border-accent);border-radius:14px;background:var(--accent-soft)}
@@ -151,16 +165,6 @@
         .quote-header strong{font-size:.78rem}
         .quote-header span{font-size:.72rem;color:var(--text-muted)}
         .quote-text{font-size:.82rem;color:var(--text-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-
-        /* FORMATTAZIONE */
-        .format-toolbar{display:flex;gap:2px;padding:4px 6px;background:var(--surface-2);border-radius:10px;border:1px solid var(--border)}
-        .fmt-btn{width:28px;height:28px;border-radius:8px;border:none;background:none;color:var(--text-muted);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);font-family:'Poppins',sans-serif;font-weight:700}
-        .fmt-btn:hover{background:var(--accent-soft);color:var(--accent)}
-        .fmt-btn.active{background:var(--accent-soft);color:var(--accent)}
-        /* Formattazione testo nel post */
-        .post-content b,.post-content strong{font-weight:700}
-        .post-content i,.post-content em{font-style:italic}
-        .post-content code{background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:1px 6px;font-family:monospace;font-size:.85em}
 
         /* NOTIF ITEM */
         .notif-item{padding:16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center;animation:fadeIn .3s ease}
@@ -398,21 +402,20 @@
         <div class="compose-box" id="compose-box">
             <img id="compose-avatar" src="images/default.png" alt="">
             <div class="compose-right" style="position:relative">
-                <!-- Format toolbar -->
-                <div style="display:flex;gap:6px;margin-bottom:8px;align-items:center">
-                    <div class="format-toolbar">
-                        <button class="fmt-btn" onclick="applyFormat('bold')" title="Grassetto"><b>B</b></button>
-                        <button class="fmt-btn" onclick="applyFormat('italic')" title="Corsivo"><i>I</i></button>
-                        <button class="fmt-btn" onclick="applyFormat('code')" title="Codice"><i class="fa-solid fa-code" style="font-size:10px"></i></button>
-                    </div>
-                </div>
                 <textarea class="compose-textarea" id="compose-text" placeholder="Cosa sta succedendo?" maxlength="500" oninput="updateChar();detectMention(this);detectLink(this)"></textarea>
                 <!-- Mention dropdown -->
                 <div class="mention-dropdown" id="mention-dropdown" style="display:none"></div>
+                <!-- Image upload hidden input -->
+                <input type="file" id="image-upload" accept="image/*" style="display:none" onchange="handleImageSelect(this)">
                 <!-- GIF preview -->
                 <div id="gif-preview-wrap" style="display:none" class="gif-preview-in-compose">
                     <img id="gif-preview-img" src="" alt="GIF">
                     <button class="remove-gif" onclick="removeGif()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <!-- Image preview -->
+                <div id="image-preview-wrap" style="display:none" class="gif-preview-in-compose">
+                    <img id="image-preview-img" src="" alt="Post image">
+                    <button class="remove-gif" onclick="removeImage()"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <!-- Link preview -->
                 <div id="link-preview-compose" style="display:none"></div>
@@ -440,9 +443,9 @@
                 <div id="quote-preview" style="display:none" class="quote-box"></div>
                 <div class="compose-actions">
                     <div class="compose-tools">
-                        <button class="compose-tool" onclick="ins('✨')" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
                         <button class="compose-tool" onclick="ins(' #')" title="Hashtag"><i class="fa-solid fa-hashtag"></i></button>
-                        <button class="compose-tool" id="gif-tool-btn" title="GIF" onclick="toggleGifPicker()"><i class="fa-solid fa-film"></i></button>
+                        <button class="compose-tool" title="Immagine" onclick="document.getElementById('image-upload').click()"><i class="fa-regular fa-image"></i></button>
+                        <button class="compose-tool" id="gif-tool-btn" title="GIF" onclick="toggleGifPicker()"><i class="fa-solid fa-face-smile"></i></button>
                         <button class="compose-tool" id="poll-tool-btn" title="Sondaggio" onclick="togglePoll()"><i class="fa-solid fa-chart-bar"></i></button>
                     </div>
                     <div style="display:flex;align-items:center;gap:12px">
@@ -527,6 +530,23 @@
                 <button class="btn-comment" onclick="postComment()">Rispondi</button>
             </div>
             <div id="comments-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- IMAGE VIEWER MODAL -->
+<div class="modal-overlay" id="imageViewerModal">
+    <div class="image-viewer-content">
+        <div class="viewer-topbar">
+            <button class="btn-icon" onclick="closeImageViewer()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="viewer-actions">
+                <button class="btn-icon" onclick="zoomImage(1.2)" title="Zoom In"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                <button class="btn-icon" onclick="zoomImage(0.8)" title="Zoom Out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                <button class="btn-icon" id="btn-download-image" title="Scarica con watermark"><i class="fa-solid fa-download"></i></button>
+            </div>
+        </div>
+        <div class="image-scroll-container" id="image-scroll-container">
+            <img id="viewer-img" src="" alt="" onclick="event.stopPropagation()" oncontextmenu="return false;" draggable="false">
         </div>
     </div>
 </div>
@@ -687,7 +707,7 @@ const auth=firebase.auth(), db=firebase.firestore();
 ═══════════════════════════════════════════════ */
 let ME=null, myData={}, myUsername=null, myVerified=false;
 let activeAlgo = localStorage.getItem('aura_feed_algo') || 'dynamic';
-let currentTab='forYou', activePostId=null, activePostData=null;
+let currentTab='forYou', activePostId=null, activePostData=null, pendingImageUrl=null;
 let likedPosts=new Set(), repostedPosts=new Set();
 let followingUIDs=new Set(), blockedUIDs=new Set();
 let lastDoc=null, isLoading=false, feedListener=null;
@@ -736,11 +756,7 @@ function toast(msg,type='success'){
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function fmt(txt){
     if(!txt) return '';
-    // Formattazione leggera: **grassetto**, *corsivo*, `code`
     let s=esc(txt);
-    s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-    s=s.replace(/\*(.+?)\*/g,'<em>$1</em>');
-    s=s.replace(/`(.+?)`/g,'<code>$1</code>');
     s=s.replace(/(#\w+)/g,'<span class="hashtag" onclick="event.stopPropagation();searchTag(\'$1\')">$1</span>');
     s=s.replace(/(@\w+)/g,'<span class="mention" onclick="event.stopPropagation();goUser(\'$1\')">$1</span>');
     s=s.replace(/\n/g,'<br>');
@@ -776,6 +792,7 @@ auth.onAuthStateChanged(async user=>{
     await loadFollowing();
     await loadBlocked();
     await checkStreak();
+    await cleanupExpiredPensieri();
 
     const name=`${myData.nome||''} ${myData.cognome||''}`.trim()||'Utente Aura';
     const avatar=myData.profileImage||'images/default.png';
@@ -881,6 +898,27 @@ async function followUser(targetUID,btn){
 async function sendNotif(to,type,post=''){
     if(!to||to===ME.uid) return;
     db.collection('notifications').add({to,from:ME.uid,fromName:(myData.nome||'')+' '+(myData.cognome||''),fromAvatar:myData.profileImage||'',type,post,ts:firebase.firestore.FieldValue.serverTimestamp()});
+}
+
+/* ═══════════════════════════════════════════════
+   PULIZIA PENSIERI SCADUTI
+═══════════════════════════════════════════════ */
+async function cleanupExpiredPensieri(){
+    if(!ME) return;
+    const now = Date.now();
+    const cutoff = now - 24*60*60*1000;
+    try {
+        const snap = await db.collection('pensieri')
+            .where('uid', '==', ME.uid)
+            .get();
+        const batch = db.batch();
+        let found = false;
+        snap.forEach(doc => {
+            const ts = doc.data().timestamp?.toDate().getTime();
+            if(ts && ts < cutoff) { batch.delete(doc.ref); found = true; }
+        });
+        if(found) await batch.commit();
+    } catch(e) { console.error("Errore cleanup pensieri:", e); }
 }
 
 /* ═══════════════════════════════════════════════
@@ -1060,26 +1098,54 @@ async function publishPensiero(){
 function scrollToCompose(){document.getElementById('compose-box').scrollIntoView({behavior:'smooth'});setTimeout(()=>document.getElementById('compose-text').focus(),400)}
 function ins(s){const ta=document.getElementById('compose-text');ta.value+=s;updateChar();ta.focus()}
 
-function applyFormat(type){
-    const ta=document.getElementById('compose-text');
-    const start=ta.selectionStart, end=ta.selectionEnd;
-    const sel=ta.value.slice(start,end)||'testo';
-    let wrap='';
-    if(type==='bold') wrap=`**${sel}**`;
-    else if(type==='italic') wrap=`*${sel}*`;
-    else if(type==='code') wrap=`\`${sel}\``;
-    ta.value=ta.value.slice(0,start)+wrap+ta.value.slice(end);
-    ta.focus();
-    updateChar();
-}
-
 function updateChar(){
     const ta=document.getElementById('compose-text');
     const left=500-ta.value.length;
     const el=document.getElementById('char-count');
     el.textContent=left;
     el.className='char-count'+(left<50?(left<0?' danger':' warn'):'');
-    document.getElementById('btn-post').disabled=ta.value.trim().length===0&&!pendingGifUrl&&!pendingPollData||left<0;
+    document.getElementById('btn-post').disabled=ta.value.trim().length===0&&!pendingGifUrl&&!pendingImageUrl&&!pendingPollData||left<0;
+}
+
+async function handleImageSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+        toast("File troppo grande (Max 5MB)", "error");
+        return;
+    }
+    const previewWrap = document.getElementById('image-preview-wrap');
+    const previewImg = document.getElementById('image-preview-img');
+    previewWrap.style.display = 'block';
+    previewImg.style.opacity = '0.5';
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+        const response = await fetch('https://verse-images-api.aurastudioitalia.it/upload-post', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+        if (result.success) {
+            pendingImageUrl = result.imageUrl;
+            previewImg.src = result.imageUrl;
+            previewImg.style.opacity = '1';
+            updateChar();
+        } else {
+            toast(result.message || "Errore caricamento", "error");
+            removeImage();
+        }
+    } catch (e) {
+        toast("Errore di connessione", "error");
+        removeImage();
+    }
+}
+
+function removeImage() {
+    pendingImageUrl = null;
+    document.getElementById('image-preview-wrap').style.display = 'none';
+    document.getElementById('image-upload').value = '';
+    updateChar();
 }
 
 /* MENTION AUTOCOMPLETE */
@@ -1142,7 +1208,7 @@ async function detectLink(ta){
 }
 
 /* GIF PICKER */
-const GIPHY_KEY='YOUR_GIPHY_KEY'; // rimpiazza con chiave Giphy
+const GIPHY_KEY='Mx5KdsE1mXrRL8bndzYCYYAvIkSDrmET'; // Chiave API pubblica di test di Giphy
 let gifPickerOpen=false;
 function toggleGifPicker(){
     gifPickerOpen=!gifPickerOpen;
@@ -1178,8 +1244,8 @@ function renderGifs(gifs){
     grid.innerHTML='';
     gifs.forEach(g=>{
         const img=document.createElement('img');
-        img.src=g.images?.fixed_width_small?.url||g.images?.downsized?.url||'';
-        img.onclick=()=>selectGif(g.images?.original?.url||img.src, g.images?.fixed_height?.url||img.src);
+        img.src=g.images?.fixed_width?.url || g.images?.fixed_width_small?.url || '';
+        img.onclick=()=>selectGif(g.images?.original?.url || img.src, g.images?.fixed_width?.url || img.src);
         img.loading='lazy';
         grid.appendChild(img);
     });
@@ -1192,7 +1258,12 @@ function selectGif(originalUrl, previewUrl){
     gifPickerOpen=false;
     updateChar();
 }
-function removeGif(){pendingGifUrl=null;document.getElementById('gif-preview-wrap').style.display='none';updateChar()}
+function removeGif(){
+    pendingGifUrl=null;
+    document.getElementById('gif-preview-wrap').style.display='none';
+    document.getElementById('gif-preview-img').src='';
+    updateChar();
+}
 
 /* POLL */
 let pollVisible=false;
@@ -1264,11 +1335,12 @@ async function publishPost(){
             pinned:false
         };
         if(pendingGifUrl) postObj.gifUrl=pendingGifUrl;
+        if(pendingImageUrl) postObj.postImage=pendingImageUrl;
         if(pendingQuoteId) postObj.quoteOf=pendingQuoteId;
         if(pollData) postObj.poll=pollData;
         await db.collection('verse').add(postObj);
         document.getElementById('compose-text').value='';
-        removeGif(); clearQuote(); removePoll();
+        removeGif(); removeImage(); clearQuote(); removePoll();
         updateChar();
         toast('Post pubblicato! ✨','success');
         // aggiorna streak
@@ -1429,7 +1501,12 @@ function buildCard(data,delay=0,pinned=false){
     // GIF
     let gifHtml='';
     if(data.gifUrl){
-        gifHtml=`<img src="${esc(data.gifUrl)}" style="width:100%;border-radius:14px;max-height:280px;object-fit:cover;margin-bottom:10px;cursor:default" onclick="event.stopPropagation()" alt="GIF" loading="lazy">`;
+        gifHtml=`<img src="${esc(data.gifUrl)}" style="width:100%;border-radius:14px;height:auto;display:block;margin-bottom:10px;cursor:default" onclick="event.stopPropagation()" oncontextmenu="return false;" draggable="false" alt="GIF" loading="lazy">`;
+    }
+    // Image
+    let imgHtml='';
+    if(data.postImage){
+        imgHtml=`<img src="${esc(data.postImage)}" style="width:100%;border-radius:14px;height:auto;display:block;margin-bottom:10px;cursor:pointer" onclick="event.stopPropagation();openImageViewer('${esc(data.postImage)}','${esc(handle)}')" oncontextmenu="return false;" draggable="false" alt="Post image" loading="lazy">`;
     }
 
     // Quote
@@ -1464,6 +1541,7 @@ function buildCard(data,delay=0,pinned=false){
             </div>
             <div class="post-content">${fmt(data.contenuto||'')}</div>
             ${gifHtml}
+            ${imgHtml}
             ${pollHtml}
             ${quoteHtml}
             <div class="post-actions">
@@ -1857,8 +1935,21 @@ async function openPost(postId){
         const gifImg=document.createElement('img');
         gifImg.id='m-gif';
         gifImg.src=postData.gifUrl;
-        gifImg.style.cssText='width:100%;border-radius:14px;max-height:320px;object-fit:cover;margin-bottom:12px';
+        gifImg.style.cssText='width:100%;border-radius:14px;height:auto;display:block;margin-bottom:12px';
         document.getElementById('m-content').after(gifImg);
+    }
+
+    // Image nel modal
+    const imgInModal=document.getElementById('m-img');
+    if(imgInModal) imgInModal.remove();
+    if(postData.postImage){
+        const postImg=document.createElement('img');
+        postImg.id='m-img';
+        postImg.src=postData.postImage;
+        postImg.style.cssText='width:100%;border-radius:14px;height:auto;display:block;margin-bottom:12px;cursor:pointer';
+        postImg.setAttribute('oncontextmenu', 'return false;'); postImg.setAttribute('draggable', 'false');
+        postImg.onclick = (e) => { e.stopPropagation(); openImageViewer(postData.postImage, handle); };
+        document.getElementById('m-content').after(postImg);
     }
 
     // Quote nel modal
@@ -2284,6 +2375,76 @@ document.getElementById('altroModal').addEventListener('click',e=>{if(e.target==
 document.getElementById('quoteModal').addEventListener('click',e=>{if(e.target===document.getElementById('quoteModal'))closeQuoteModal()});
 function closeListModal(){document.getElementById('listModal').classList.remove('open')}
 document.getElementById('listModal').addEventListener('click',e=>{if(e.target===document.getElementById('listModal'))closeListModal()});
+
+/* ═══════════════════════════════════════════════
+   IMAGE VIEWER & WATERMARK
+═══════════════════════════════════════════════ */
+let currentZoom = 1;
+function openImageViewer(url, authorHandle) {
+    const modal = document.getElementById('imageViewerModal');
+    const img = document.getElementById('viewer-img');
+    img.src = url;
+    currentZoom = 1;
+    img.style.transform = `scale(${currentZoom})`;
+    document.getElementById('btn-download-image').onclick = () => downloadWithWatermark(url, authorHandle);
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeImageViewer() {
+    document.getElementById('imageViewerModal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+function zoomImage(factor) {
+    currentZoom *= factor;
+    currentZoom = Math.min(Math.max(currentZoom, 0.5), 5);
+    document.getElementById('viewer-img').style.transform = `scale(${currentZoom})`;
+}
+async function downloadWithWatermark(url, author) {
+    toast("Generazione immagine...", "info");
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = url;
+    img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        const fontSize = Math.max(16, Math.floor(canvas.width / 45));
+        ctx.font = `600 ${fontSize}px Poppins, sans-serif`;
+        const text = `Da un post AuraVerse di @${author}`;
+        const metrics = ctx.measureText(text);
+        const textWidth = metrics.width;
+        const padding = fontSize * 0.8;
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        const x = canvas.width - textWidth - padding * 2 - 20;
+        const y = canvas.height - fontSize - padding * 2 - 20;
+        const w = textWidth + padding * 2;
+        const h = fontSize + padding * 2;
+        const r = 10;
+        ctx.beginPath();
+        ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = 'white';
+        ctx.fillText(text, canvas.width - textWidth - padding - 20, canvas.height - padding - 20);
+        const link = document.createElement('a');
+        link.download = `AuraVerse-${author}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        toast("Immagine scaricata!", "success");
+    };
+}
+document.getElementById('imageViewerModal').onclick = (e) => {
+    if(e.target === document.getElementById('imageViewerModal') || e.target === document.getElementById('image-scroll-container')) closeImageViewer();
+};
+
+document.getElementById('image-scroll-container').addEventListener('wheel', (e) => {
+    if (document.getElementById('imageViewerModal').classList.contains('open')) {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.1 : 0.9;
+        zoomImage(factor);
+    }
+}, { passive: false });
 
 function openPreferencesModal(){
     document.querySelectorAll('.algo-option').forEach(b => b.classList.remove('active'));
